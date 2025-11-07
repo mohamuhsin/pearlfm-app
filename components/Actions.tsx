@@ -11,7 +11,7 @@ import { COLORS } from "../theme/colors";
 import {
   Newspaper,
   Landmark,
-  BookOpenText,
+  Handshake,
   CalendarDays,
 } from "lucide-react-native";
 
@@ -27,7 +27,7 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
   // 🎨 Colors
   const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
   const TEXT = COLORS.white;
-  const ICON_BG = isLight ? "rgba(0, 0, 0, 0.25)" : "#141414";
+  const ICON_BG = isLight ? "#1f2431" : "#1f2431";
   const ICON_COLOR = COLORS.white;
 
   const categories = [
@@ -38,23 +38,24 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
       icon: Landmark,
       link: "https://pearlfm.ug/dawah",
     },
-    {
-      id: 3,
-      name: "Qur’an",
-      icon: BookOpenText,
-      link: "https://pearlfm.ug/quran",
-    },
+
     {
       id: 4,
       name: "Events",
       icon: CalendarDays,
       link: "https://pearlfm.ug/events",
     },
+    {
+      id: 3,
+      name: "Partners",
+      icon: Handshake,
+      link: "https://pearlfm.ug/partners",
+    },
   ];
 
   return (
     <View style={[styles.wrapper, { backgroundColor: BG }]}>
-      <Text style={[styles.title, { color: TEXT }]}>Top Actions</Text>
+      <Text style={[styles.title, { color: TEXT }]}>Top actions</Text>
 
       <View style={styles.row}>
         {categories.map((cat) => {
@@ -97,7 +98,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     paddingHorizontal: 20,
     marginBottom: 18,
-    textTransform: "none", // ✅ no uppercase
+    textTransform: "none",
   },
   row: {
     flexDirection: "row",
