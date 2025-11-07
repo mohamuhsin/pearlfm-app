@@ -11,7 +11,11 @@ interface ComingSoonProps {
 }
 
 /**
- * 🧱 ComingSoon — Reusable placeholder for unfinished screens
+ * 🚧 ComingSoon — Pulse Edition
+ * ------------------------------------------------------------
+ * • Uses Pearl FM’s maroon base (#2E0B0F)
+ * • Gold accent title (#FFCB05)
+ * • Soft white supporting text
  */
 export default function ComingSoon({
   title = "🚧 Coming Soon 🚧",
@@ -32,25 +36,29 @@ export default function ComingSoon({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.primary, // deep maroon
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
   },
   emoji: {
-    fontSize: 40,
-    marginBottom: 10,
+    fontSize: 44,
+    marginBottom: 12,
   },
   title: {
     fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.primary,
+    fontWeight: "800",
+    color: COLORS.accent, // gold highlight
     textAlign: "center",
     marginBottom: 8,
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
   },
   message: {
-    color: COLORS.muted,
-    fontSize: 14,
+    color: "#FFFFFFCC",
+    fontSize: 15,
+    lineHeight: 22,
     textAlign: "center",
+    maxWidth: 300,
   },
 });

@@ -1,6 +1,10 @@
 import React from "react";
 import { View, Text, Platform } from "react-native";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  DefaultTheme,
+  DarkTheme,
+} from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   Home,
@@ -9,118 +13,141 @@ import {
   Ticket,
   User2,
 } from "lucide-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS } from "../theme/colors";
-
-// Screens
 import HomeScreen from "../screens/HomeScreen";
 import ComingSoonScreen from "../components/ComingSoon";
 
+/* -------------------------------------------------------------
+   🌈 ICONS + LABELS
+------------------------------------------------------------- */
+const ICONS: Record<string, React.ComponentType<any>> = {
+  Home,
+  Charity: HeartHandshake,
+  Shop: ShoppingCart,
+  Tickets: Ticket,
+  Account: User2,
+};
+
+const LABELS: Record<string, string> = {
+  Home: "Home",
+  Charity: "Charity",
+  Shop: "Shop",
+  Tickets: "Tickets",
+  Account: "Account",
+};
+
+const TAB_HEIGHT = Platform.select({ ios: 86, android: 74 }) as number;
+const PADDING_TOP = 10;
+const PADDING_BOTTOM = 6;
+const Y_SHIFT = Platform.select({ ios: 2, android: 2.5 }) as number;
+
 const Tab = createBottomTabNavigator();
 
-/* ============================================================
-   🎧 RootNavigator — Pearl FM Uganda (Line-Fix Edition)
-   ------------------------------------------------------------
-   ✅ Fixes active bubble cutting through border
-   ✅ Maintains all blue premium visuals
-   ✅ Balanced, readable, and production-ready
-============================================================ */
-
+/* -------------------------------------------------------------
+   ⚡ RootNavigator — Pearl FM Uganda (Dark Bottom Bar Edition)
+   -------------------------------------------------------------
+   ✴ Dark bar (nav) background
+   ✴ Active icons/text = white
+   ✴ Inactive icons/text = soft gray
+------------------------------------------------------------- */
 export default function RootNavigator() {
-  const iconMap: Record<string, React.ComponentType<any>> = {
-    Home,
-    Charity: HeartHandshake,
-    Shop: ShoppingCart,
-    Tickets: Ticket,
-    Account: User2,
-  };
-
-  const ACTIVE = COLORS.primary || "#030268";
-  const INACTIVE = COLORS.muted || "#9CA3AF";
-  const BORDER = "#E5E7EB";
-  const BG = COLORS.white || "#FFFFFF";
+  const TAB_BG = "#0f0f12ff"; // dark background for the bottom nav
+  const ACTIVE = "#FFFFFF"; // white active icons/text
+  const INACTIVE = "#9CA3AF"; // muted gray
+  const BORDER = "#1F1F22"; // subtle border line
+  const TEXT = COLORS.text;
 
   const navTheme = {
     ...DefaultTheme,
-    colors: { ...DefaultTheme.colors, background: BG },
+    colors: {
+      ...DefaultTheme.colors,
+      background: COLORS.background,
+      text: TEXT,
+    },
   };
 
   return (
     <NavigationContainer theme={navTheme}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: BORDER, // ✅ adds visual separation
-          paddingTop: 0.5, // ✅ thin border illusion outside tab bar
-        }}
-      >
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            headerShown: false,
-            tabBarActiveTintColor: ACTIVE,
-            tabBarInactiveTintColor: INACTIVE,
-            tabBarStyle: {
-              backgroundColor: BG,
-              borderTopWidth: 0, // ✅ remove internal border (handled by wrapper)
-              height: Platform.OS === "ios" ? 88 : 80,
-              paddingBottom: Platform.OS === "ios" ? 14 : 10,
-              paddingTop: 6,
-              elevation: 10,
-              shadowColor: "#000",
-              shadowOpacity: 0.05,
-              shadowOffset: { width: 0, height: -2 },
-              shadowRadius: 4,
-              overflow: "hidden",
-            },
-            tabBarLabel: () => null,
-            tabBarIcon: ({ color, focused }) => {
-              const Icon = iconMap[route.name] || Home;
+      <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              headerShown: false,
+              tabBarActiveTintColor: ACTIVE,
+              tabBarInactiveTintColor: INACTIVE,
+              tabBarHideOnKeyboard: true,
+              animation: "fade",
+              tabBarStyle: {
+                backgroundColor: TAB_BG,
+                borderTopWidth: 1,
+                borderTopColor: BORDER,
+                height: TAB_HEIGHT,
+                paddingTop: PADDING_TOP,
+                paddingBottom: PADDING_BOTTOM,
+                elevation: 10,
+                shadowColor: "#000000",
+                shadowOpacity: 0.5,
+                shadowOffset: { width: 0, height: -3 },
+                shadowRadius: 8,
+              },
+              tabBarLabel: () => null,
 
-              const baseSize = 28;
-              const iconSize = focused ? baseSize + 3 : baseSize;
-              const stroke = focused ? 2.5 : 2.2;
-              const labelSize = focused ? 15 : 14;
+              /* --------------------------------------------
+                 🎧 Icon + Label
+              -------------------------------------------- */
+              tabBarIcon: ({ color, focused }) => {
+                const Icon = ICONS[route.name] || Home;
+                const label = LABELS[route.name] ?? route.name;
 
-              return (
-                <View
-                  style={{
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transform: [{ scale: focused ? 1.07 : 1 }],
-                  }}
-                >
+                return (
                   <View
                     style={{
-                      padding: 8,
-                      borderRadius: 20,
-                      marginBottom: 3,
-                      backgroundColor: focused ? `${ACTIVE}20` : "transparent",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                      transform: [{ translateY: Y_SHIFT }],
+                      minWidth: 72,
                     }}
+                    accessibilityRole="tab"
+                    accessibilityLabel={label}
+                    hitSlop={{ top: 6, bottom: 6, left: 8, right: 8 }}
                   >
-                    <Icon size={iconSize} color={color} strokeWidth={stroke} />
+                    <Icon
+                      size={focused ? 34 : 30}
+                      color={color}
+                      strokeWidth={focused ? 2.6 : 2.2}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 10,
+                        lineHeight: 11,
+                        marginTop: 2,
+                        fontWeight: focused ? "700" : "500",
+                        color,
+                        letterSpacing: 0.1,
+                        textAlign: "center",
+                        includeFontPadding: false,
+                      }}
+                      numberOfLines={2}
+                      ellipsizeMode="clip"
+                      allowFontScaling={false}
+                    >
+                      {label}
+                    </Text>
                   </View>
-                  <Text
-                    style={{
-                      fontSize: labelSize,
-                      marginTop: 3,
-                      fontWeight: focused ? "700" : "600",
-                      color,
-                      letterSpacing: 0.3,
-                    }}
-                  >
-                    {route.name}
-                  </Text>
-                </View>
-              );
-            },
-          })}
-        >
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Charity" component={ComingSoonScreen} />
-          <Tab.Screen name="Shop" component={ComingSoonScreen} />
-          <Tab.Screen name="Tickets" component={ComingSoonScreen} />
-          <Tab.Screen name="Account" component={ComingSoonScreen} />
-        </Tab.Navigator>
-      </View>
+                );
+              },
+            })}
+          >
+            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Shop" component={ComingSoonScreen} />
+            <Tab.Screen name="Charity" component={ComingSoonScreen} />
+            <Tab.Screen name="Tickets" component={ComingSoonScreen} />
+            <Tab.Screen name="Account" component={ComingSoonScreen} />
+          </Tab.Navigator>
+        </View>
+      </SafeAreaView>
     </NavigationContainer>
   );
 }

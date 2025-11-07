@@ -1,103 +1,146 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  StatusBar,
+  ScrollView,
 } from "react-native";
-import { Audio } from "expo-av";
+import { useAudioPlayer } from "expo-audio";
 import { COLORS } from "../theme/colors";
+import TopBar from "../components/TopBar";
+import Greetings from "../components/Greetings";
+import TopCategories from "../components/Actions";
+import AdCarousel from "../components/AdCarousel";
 
 export default function HomeScreen() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const sound = useRef<Audio.Sound | null>(null);
-
   const STREAM_URL = "https://dc4.serverse.com/proxy/pearlfm/stream";
+  const player = useAudioPlayer(STREAM_URL);
+  const [loading, setLoading] = useState(false);
 
   async function togglePlayback() {
     try {
-      if (!isPlaying) {
-        setLoading(true);
-        const { sound: playbackObj } = await Audio.Sound.createAsync(
-          { uri: STREAM_URL },
-          { shouldPlay: true }
-        );
-        sound.current = playbackObj;
-        setIsPlaying(true);
+      setLoading(true);
+      if (player.playing) {
+        await player.pause();
       } else {
-        await sound.current?.stopAsync();
-        await sound.current?.unloadAsync();
-        setIsPlaying(false);
+        await player.play();
       }
     } catch (err) {
-      console.log("Playback error", err);
+      console.error("Playback error:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  // cleanup when component unmounts
-  useEffect(() => {
-    return () => {
-      sound.current?.unloadAsync();
-    };
-  }, []);
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.greeting}>🎙️ Pearl FM Uganda</Text>
-      <Text style={styles.subtext}>Assalamu Alaikum — Tune in live</Text>
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <TopBar variant="light" />
 
-      <TouchableOpacity
-        style={[styles.button, isPlaying && styles.buttonActive]}
-        onPress={togglePlayback}
-        disabled={loading}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>
-            {isPlaying ? "⏸ Pause" : "▶️ Listen Live"}
-          </Text>
-        )}
-      </TouchableOpacity>
+        {/* 👋 Greeting Section */}
+        <Greetings variant="light" />
+
+        {/* 🎞️ Ad Carousel */}
+        <AdCarousel variant="light" />
+
+        {/* 🧭 Quick Actions */}
+        <TopCategories variant="light" />
+
+        {/* 🎧 Live Radio Section */}
+        <View style={styles.body}>
+          <Text style={styles.title}>🎙️ Pearl FM Uganda</Text>
+          <Text style={styles.subtitle}>Assalamu Alaikum — Tune in Live</Text>
+
+          <TouchableOpacity
+            style={[
+              styles.button,
+              player.playing && styles.buttonActive,
+              loading && { opacity: 0.6 },
+            ]}
+            onPress={togglePlayback}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <Text
+                style={[
+                  styles.buttonText,
+                  player.playing && styles.buttonTextActive,
+                ]}
+              >
+                {player.playing ? "⏸ Pause" : "▶️ Listen Live"}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.background, // 🤍 soft and breathable
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
+  body: {
     justifyContent: "center",
     alignItems: "center",
-    padding: 24,
+    paddingVertical: 40,
+    paddingHorizontal: 24,
   },
-  greeting: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.primary,
+  title: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: COLORS.primary, // brand blue/maroon
     marginBottom: 8,
+    letterSpacing: 0.5,
+    textAlign: "center",
   },
-  subtext: {
-    color: COLORS.text,
-    opacity: 0.8,
+  subtitle: {
+    color: COLORS.muted,
+    fontSize: 15,
     marginBottom: 32,
+    textAlign: "center",
+    letterSpacing: 0.2,
   },
   button: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.accent, // 🟠 CTA button
     paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 30,
+    paddingHorizontal: 56,
+    borderRadius: 35,
+    shadowColor: "#00000040",
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 5,
   },
   buttonActive: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.white, // solid white when active
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: COLORS.white,
+    fontWeight: "800",
     fontSize: 16,
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+  },
+  buttonTextActive: {
+    color: COLORS.primary,
   },
 });
