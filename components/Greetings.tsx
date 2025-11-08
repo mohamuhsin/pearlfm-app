@@ -12,29 +12,26 @@ export default function Greetings({ variant }: GreetingsProps) {
   const isLight = variant === "light" || (!variant && !isDarkScheme);
 
   // 🎨 Colors
-  const backgroundColor = isLight ? COLORS.primary : COLORS.backgroundDark;
-  const textColor = COLORS.white;
+  const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
+  const TEXT = COLORS.white;
 
   return (
-    <View style={[styles.wrapper, { backgroundColor }]}>
-      <Text style={[styles.greeting, { color: textColor }]}>
-        Assalamu Alaikum!
-      </Text>
+    <View style={[styles.wrapper, { backgroundColor: BG }]}>
+      <Text style={[styles.greeting, { color: TEXT }]}>Assalamu Alaikum!</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
-    paddingTop: 20,
-    paddingBottom: 16,
-    paddingHorizontal: 20,
+    backgroundColor: COLORS.primary,
+    paddingTop: 28,
+    paddingBottom: 20,
+    paddingHorizontal: 22,
   },
   greeting: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "900",
-    letterSpacing: 0.4,
-    textTransform: "capitalize",
-    color: COLORS.white,
+    letterSpacing: 0.3,
   },
 });

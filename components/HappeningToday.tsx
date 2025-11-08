@@ -1,43 +1,45 @@
 import React, { useRef, useState, useEffect } from "react";
 import {
   View,
+  Text,
   FlatList,
   ImageBackground,
+  TouchableOpacity,
   StyleSheet,
   Dimensions,
-  TouchableOpacity,
-  NativeScrollEvent,
   NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../theme/colors";
 
 const { width } = Dimensions.get("window");
-const H_PADDING = 24;
+const H_PADDING = 22; // ✅ matches alignment of other sections
 const HERO_WIDTH = width;
-const HERO_HEIGHT = 260; // ✅ reduced from 340 → 260 for better visual balance
+const HERO_HEIGHT = 150; // ✅ slightly reduced for perfect mobile ratio
 
-interface AdCarouselProps {
+interface HappeningTodayProps {
   images?: string[];
   interval?: number;
   variant?: "light" | "dark";
 }
 
-export default function AdCarousel({
+export default function HappeningToday({
   images = [
-    "https://i.pinimg.com/736x/30/e9/7b/30e97b7958e741b718179d6ba62b6608.jpg",
-    "https://i.pinimg.com/736x/30/e9/7b/30e97b7958e741b718179d6ba62b6608.jpg",
-    "https://i.pinimg.com/736x/30/e9/7b/30e97b7958e741b718179d6ba62b6608.jpg",
+    "https://i.pinimg.com/736x/02/5b/7e/025b7ee74f4747d4b58f9dc1d584f8cb.jpg",
+    "https://i.pinimg.com/736x/56/d9/5d/56d95df0c33c3774a4b0c55d94e38c84.jpg",
+    "https://i.pinimg.com/736x/a4/0e/fb/a40efb96321c84cf44e64a1847b6fbc7.jpg",
   ],
   interval = 5000,
   variant = "light",
-}: AdCarouselProps) {
+}: HappeningTodayProps) {
   const [index, setIndex] = useState(0);
   const flatListRef = useRef<FlatList<string>>(null);
   const timer = useRef<NodeJS.Timeout | null>(null);
 
   const isLight = variant === "light";
-  const SECTION_BG = isLight ? COLORS.primary : COLORS.backgroundDark;
+  const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
+  const TEXT = COLORS.white;
 
   // 🕒 Auto-scroll
   useEffect(() => {
@@ -70,7 +72,9 @@ export default function AdCarousel({
   };
 
   return (
-    <View style={[styles.section, { backgroundColor: SECTION_BG }]}>
+    <View style={[styles.section, { backgroundColor: BG }]}>
+      <Text style={[styles.title, { color: TEXT }]}>Happening Today</Text>
+
       <FlatList
         ref={flatListRef}
         data={images}
@@ -90,7 +94,7 @@ export default function AdCarousel({
                 resizeMode="cover"
               >
                 <LinearGradient
-                  colors={["rgba(0,0,0,0.25)", "rgba(0,0,0,0.65)"]}
+                  colors={["rgba(0,0,0,0.15)", "rgba(0,0,0,0.55)"]}
                   style={styles.gradient}
                 />
               </ImageBackground>
@@ -99,6 +103,7 @@ export default function AdCarousel({
         )}
       />
 
+      {/* Dots */}
       <View style={styles.dots}>
         {images.map((_, i) => (
           <TouchableOpacity
@@ -126,7 +131,16 @@ const styles = StyleSheet.create({
   section: {
     width: "100%",
     alignItems: "center",
-    paddingVertical: 24,
+    paddingTop: 22,
+    paddingBottom: 36,
+  },
+  title: {
+    fontSize: 20, // ⬆️ Matches "Programs" and "Top Actions"
+    fontWeight: "900", // ⬆️ Stronger presence
+    letterSpacing: 0.4,
+    paddingHorizontal: 22, // ✅ Same left padding as other titles
+    marginBottom: 20,
+    alignSelf: "flex-start",
   },
   cardWrapper: {
     width: HERO_WIDTH,
@@ -134,7 +148,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    height: HERO_HEIGHT, // ✅ new reduced height
+    height: HERO_HEIGHT,
     overflow: "hidden",
   },
   image: {

@@ -37,7 +37,12 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
       icon: PlayCircle,
       link: "https://pearlfm.ug/live",
     },
-    { id: 2, name: "Shop", icon: ShoppingBag, link: "https://pearlfm.ug/shop" },
+    {
+      id: 2,
+      name: "Shop",
+      icon: ShoppingBag,
+      link: "https://pearlfm.ug/shop",
+    },
     {
       id: 4,
       name: "Events",
@@ -54,8 +59,10 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
 
   return (
     <View style={[styles.wrapper, { backgroundColor: BG }]}>
+      {/* Section Title */}
       <Text style={[styles.title, { color: TEXT }]}>Top Actions</Text>
 
+      {/* Category Row */}
       <View style={styles.row}>
         {categories.map((cat) => {
           const Icon = cat.icon;
@@ -71,11 +78,11 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
                   styles.iconWrapper,
                   {
                     backgroundColor: ICON_BG,
-                    borderColor: "rgba(255,255,255,0.05)",
+                    borderColor: "rgba(255,255,255,0.06)",
                   },
                 ]}
               >
-                <Icon size={24} color={ICON_COLOR} strokeWidth={2.3} />
+                <Icon size={24} color={ICON_COLOR} strokeWidth={2.4} />
               </View>
               <Text style={[styles.label, { color: TEXT }]}>{cat.name}</Text>
             </TouchableOpacity>
@@ -88,20 +95,20 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    paddingTop: 20,
+    paddingTop: 22,
     paddingBottom: 36,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 20, // ⬆️ Slightly larger
+    fontWeight: "900", // ⬆️ Stronger boldness
     letterSpacing: 0.4,
-    paddingHorizontal: 20,
-    marginBottom: 18,
+    paddingHorizontal: 22, // ⬆️ Matches other sections (like Greetings)
+    marginBottom: 20,
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
   },
   item: {
     flex: 1,
@@ -109,23 +116,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   iconWrapper: {
-    width: 70, // smaller width for a neater oval
-    height: 42, // slightly shorter for compactness
-    borderRadius: 24, // smooth curvature
+    width: 72,
+    height: 44,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1.1,
+    borderWidth: 1.2,
     shadowColor: "#00000055",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.25,
     shadowRadius: 3,
-    elevation: 2.5,
+    elevation: 3,
   },
   label: {
-    fontSize: 10.5,
-    fontWeight: "700",
-    marginTop: 6,
-    letterSpacing: 0.15,
+    fontSize: 11,
+    fontWeight: "800", // ⬆️ Sharper weight
+    marginTop: 7,
+    letterSpacing: 0.2,
     textAlign: "center",
     textTransform: "capitalize",
   },

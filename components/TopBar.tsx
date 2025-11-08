@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Bell } from "lucide-react-native";
+import { BlurView } from "expo-blur";
 import { COLORS } from "../theme/colors";
 
 interface TopBarProps {
@@ -23,32 +24,55 @@ export default function TopBar({ variant, onPressNotifications }: TopBarProps) {
   const isDarkScheme = scheme === "dark";
   const isLight = variant === "light" || (!variant && !isDarkScheme);
 
-  const backgroundColor = isLight ? COLORS.primary : COLORS.backgroundDark;
-  const accentColor = COLORS.accent;
-  const iconColor = COLORS.white;
+  // 🎨 Colors
+  const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
+  const ACCENT = COLORS.accent;
+  const ICON = COLORS.white;
 
-  // 🧠 Dynamic left offset — detects internal padding in logo.png
   const [leftOffset, setLeftOffset] = useState(0);
 
   const handleLogoLayout = (e: LayoutChangeEvent) => {
     const { x } = e.nativeEvent.layout;
-    // If logo starts slightly right of container, compensate dynamically
     if (x > 0) setLeftOffset(-x);
   };
 
+  // 🪟 Platform container (blur for iOS, solid for Android)
+  const Container =
+    Platform.OS === "ios"
+      ? ({ children }: { children: React.ReactNode }) => (
+          <BlurView
+            intensity={40}
+            tint={isLight ? "light" : "dark"}
+            style={[styles.container, { backgroundColor: "transparent" }]}
+          >
+            {children}
+          </BlurView>
+        )
+      : ({ children }: { children: React.ReactNode }) => (
+          <View
+            style={[
+              styles.container,
+              { backgroundColor: BG }, // ✅ unified with theme
+            ]}
+          >
+            {children}
+          </View>
+        );
+
   return (
-    <View style={[styles.wrapper, { backgroundColor }]}>
+    <View style={styles.wrapper}>
       <StatusBar
-        translucent={false}
-        backgroundColor={backgroundColor}
+        translucent
+        backgroundColor="transparent"
         barStyle="light-content"
       />
 
       <SafeAreaView edges={["top", "left", "right"]}>
-        <View style={[styles.separator, { backgroundColor: accentColor }]} />
+        {/* 🔸 Accent line */}
+        <View style={[styles.separator, { backgroundColor: ACCENT }]} />
 
-        <View style={[styles.container, { backgroundColor }]}>
-          {/* 🖼️ Logo — adjusts automatically for true alignment */}
+        <Container>
+          {/* 🖼️ Logo */}
           <Image
             onLayout={handleLogoLayout}
             source={require("../assets/logo.png")}
@@ -65,9 +89,9 @@ export default function TopBar({ variant, onPressNotifications }: TopBarProps) {
             }
             style={styles.iconButton}
           >
-            <Bell size={26} color={iconColor} strokeWidth={2.3} />
+            <Bell size={26} color={ICON} strokeWidth={2.3} />
           </TouchableOpacity>
-        </View>
+        </Container>
       </SafeAreaView>
     </View>
   );
@@ -75,14 +99,15 @@ export default function TopBar({ variant, onPressNotifications }: TopBarProps) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: "transparent",
+    overflow: "hidden",
     ...Platform.select({
-      android: { elevation: 5 },
+      android: { elevation: 8 },
       ios: {
-        shadowColor: "#00000022",
-        shadowOpacity: 0.15,
-        shadowOffset: { width: 0, height: 1 },
-        shadowRadius: 2,
+        shadowColor: "#00000040",
+        shadowOpacity: 0.18,
+        shadowOffset: { width: 0, height: 3 },
+        shadowRadius: 4,
       },
     }),
   },
@@ -91,22 +116,23 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   container: {
-    height: 60,
+    height: 68,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 24,
+    paddingHorizontal: 22,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "rgba(255,255,255,0.1)",
   },
   logo: {
-    width: 115,
-    height: 38,
+    width: 145,
+    height: 46,
   },
   iconButton: {
     marginRight: -2,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
+    padding: 4,
   },
 });
