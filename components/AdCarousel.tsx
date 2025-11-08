@@ -13,8 +13,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "../theme/colors";
 
 const { width } = Dimensions.get("window");
-const H_PADDING = 24; // ✅ unchanged padding
-const HERO_WIDTH = width; // full width per image
+const H_PADDING = 24;
+const HERO_WIDTH = width;
 const HERO_HEIGHT = 340;
 
 interface AdCarouselProps {

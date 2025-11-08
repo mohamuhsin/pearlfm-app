@@ -1,36 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   useColorScheme,
   Platform,
   StatusBar,
+  Image,
+  LayoutChangeEvent,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Bell } from "lucide-react-native";
 import { COLORS } from "../theme/colors";
 
 interface TopBarProps {
   variant?: "light" | "dark";
-  onPressLogin?: () => void;
+  onPressNotifications?: () => void;
 }
 
-export default function TopBar({ variant, onPressLogin }: TopBarProps) {
+export default function TopBar({ variant, onPressNotifications }: TopBarProps) {
   const scheme = useColorScheme();
   const isDarkScheme = scheme === "dark";
   const isLight = variant === "light" || (!variant && !isDarkScheme);
 
-  // 🎨 Theme-aware colors
   const backgroundColor = isLight ? COLORS.primary : COLORS.backgroundDark;
-  const textColor = COLORS.white;
   const accentColor = COLORS.accent;
-  const buttonBackground = isLight ? COLORS.accent : COLORS.primarySoft;
-  const buttonText = COLORS.white;
+  const iconColor = COLORS.white;
+
+  // 🧠 Dynamic left offset — detects internal padding in logo.png
+  const [leftOffset, setLeftOffset] = useState(0);
+
+  const handleLogoLayout = (e: LayoutChangeEvent) => {
+    const { x } = e.nativeEvent.layout;
+    // If logo starts slightly right of container, compensate dynamically
+    if (x > 0) setLeftOffset(-x);
+  };
 
   return (
     <View style={[styles.wrapper, { backgroundColor }]}>
-      {/* 🧱 Fully opaque StatusBar */}
       <StatusBar
         translucent={false}
         backgroundColor={backgroundColor}
@@ -38,28 +45,27 @@ export default function TopBar({ variant, onPressLogin }: TopBarProps) {
       />
 
       <SafeAreaView edges={["top", "left", "right"]}>
-        {/* 🔶 Accent separator line */}
         <View style={[styles.separator, { backgroundColor: accentColor }]} />
 
-        <View
-          style={[
-            styles.container,
-            {
-              backgroundColor,
-              borderBottomColor: "rgba(255,255,255,0.1)",
-            },
-          ]}
-        >
-          <Text style={[styles.title, { color: textColor }]}>PEARL FM</Text>
+        <View style={[styles.container, { backgroundColor }]}>
+          {/* 🖼️ Logo — adjusts automatically for true alignment */}
+          <Image
+            onLayout={handleLogoLayout}
+            source={require("../assets/logo.png")}
+            style={[styles.logo, { marginLeft: leftOffset }]}
+            resizeMode="contain"
+          />
 
+          {/* 🔔 Notifications */}
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: buttonBackground }]}
-            activeOpacity={0.9}
-            onPress={onPressLogin || (() => console.log("Login pressed"))}
+            activeOpacity={0.8}
+            onPress={
+              onPressNotifications ||
+              (() => console.log("Notifications pressed"))
+            }
+            style={styles.iconButton}
           >
-            <Text style={[styles.buttonText, { color: buttonText }]}>
-              Login
-            </Text>
+            <Bell size={26} color={iconColor} strokeWidth={2.3} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -89,29 +95,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(255,255,255,0.1)",
   },
-  title: {
-    fontSize: 21,
-    fontWeight: "900",
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
+  logo: {
+    width: 115,
+    height: 38,
   },
-  button: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 26,
-    shadowColor: "#00000025",
-    shadowOpacity: 0.25,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+  iconButton: {
+    marginRight: -2,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

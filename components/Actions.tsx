@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import { COLORS } from "../theme/colors";
 import {
-  Newspaper,
-  Landmark,
+  PlayCircle,
+  ShoppingBag,
   Handshake,
   CalendarDays,
 } from "lucide-react-native";
@@ -27,18 +27,17 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
   // 🎨 Colors
   const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
   const TEXT = COLORS.white;
-  const ICON_BG = isLight ? "#1f2431" : "#1f2431";
+  const ICON_BG = "#1f2431";
   const ICON_COLOR = COLORS.white;
 
   const categories = [
-    { id: 1, name: "News", icon: Newspaper, link: "https://pearlfm.ug/news" },
     {
-      id: 2,
-      name: "Da’wah",
-      icon: Landmark,
-      link: "https://pearlfm.ug/dawah",
+      id: 1,
+      name: "Watch Live",
+      icon: PlayCircle,
+      link: "https://pearlfm.ug/live",
     },
-
+    { id: 2, name: "Shop", icon: ShoppingBag, link: "https://pearlfm.ug/shop" },
     {
       id: 4,
       name: "Events",
@@ -55,7 +54,7 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
 
   return (
     <View style={[styles.wrapper, { backgroundColor: BG }]}>
-      <Text style={[styles.title, { color: TEXT }]}>Top actions</Text>
+      <Text style={[styles.title, { color: TEXT }]}>Top Actions</Text>
 
       <View style={styles.row}>
         {categories.map((cat) => {
@@ -76,7 +75,7 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
                   },
                 ]}
               >
-                <Icon size={28} color={ICON_COLOR} strokeWidth={2.1} />
+                <Icon size={24} color={ICON_COLOR} strokeWidth={2.3} />
               </View>
               <Text style={[styles.label, { color: TEXT }]}>{cat.name}</Text>
             </TouchableOpacity>
@@ -98,7 +97,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     paddingHorizontal: 20,
     marginBottom: 18,
-    textTransform: "none",
   },
   row: {
     flexDirection: "row",
@@ -111,22 +109,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   iconWrapper: {
-    width: 66,
-    height: 46,
-    borderRadius: 22,
+    width: 70, // smaller width for a neater oval
+    height: 42, // slightly shorter for compactness
+    borderRadius: 24, // smooth curvature
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1.1,
     shadowColor: "#00000055",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.2,
     shadowRadius: 3,
-    elevation: 3,
+    elevation: 2.5,
   },
   label: {
-    fontSize: 12.5,
+    fontSize: 10.5,
     fontWeight: "700",
     marginTop: 6,
-    letterSpacing: 0.25,
+    letterSpacing: 0.15,
     textAlign: "center",
     textTransform: "capitalize",
   },
