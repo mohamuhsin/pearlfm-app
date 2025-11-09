@@ -1,76 +1,69 @@
 import React, { useRef, useState, useEffect } from "react";
 import {
   View,
+  Text,
   FlatList,
   ImageBackground,
+  TouchableOpacity,
   StyleSheet,
   Dimensions,
-  TouchableOpacity,
-  NativeScrollEvent,
   NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { COLORS } from "../theme/colors";
+import Section from "../reusable/Sections";
+import { useAppTheme } from "../../hooks/useAppTheme";
+import { LAYOUT } from "../../theme/layout";
 
 const { width } = Dimensions.get("window");
-const H_PADDING = 24;
 const HERO_WIDTH = width;
-const HERO_HEIGHT = 260; // ✅ reduced from 340 → 260 for better visual balance
+const HERO_HEIGHT = 150;
 
-interface AdCarouselProps {
+interface HappeningTodayProps {
   images?: string[];
   interval?: number;
   variant?: "light" | "dark";
 }
 
-export default function AdCarousel({
+export default function HappeningToday({
   images = [
-    "https://i.pinimg.com/736x/30/e9/7b/30e97b7958e741b718179d6ba62b6608.jpg",
-    "https://i.pinimg.com/736x/30/e9/7b/30e97b7958e741b718179d6ba62b6608.jpg",
-    "https://i.pinimg.com/736x/30/e9/7b/30e97b7958e741b718179d6ba62b6608.jpg",
+    "https://i.pinimg.com/736x/02/5b/7e/025b7ee74f4747d4b58f9dc1d584f8cb.jpg",
+    "https://i.pinimg.com/736x/56/d9/5d/56d95df0c33c3774a4b0c55d94e38c84.jpg",
+    "https://i.pinimg.com/736x/a4/0e/fb/a40efb96321c84cf44e64a1847b6fbc7.jpg",
   ],
   interval = 5000,
   variant = "light",
-}: AdCarouselProps) {
+}: HappeningTodayProps) {
   const [index, setIndex] = useState(0);
   const flatListRef = useRef<FlatList<string>>(null);
   const timer = useRef<NodeJS.Timeout | null>(null);
+  const { text, accent } = useAppTheme(variant);
 
-  const isLight = variant === "light";
-  const SECTION_BG = isLight ? COLORS.primary : COLORS.backgroundDark;
-
-  // 🕒 Auto-scroll
   useEffect(() => {
     timer.current = setInterval(() => {
-      const next = (index + 1) % images.length;
-      scrollToIndex(next);
+      setIndex((prev) => {
+        const next = (prev + 1) % images.length;
+        flatListRef.current?.scrollToOffset({
+          offset: next * HERO_WIDTH,
+          animated: true,
+        });
+        return next;
+      });
     }, interval);
-
     return () => {
-      if (timer.current) {
-        clearInterval(timer.current);
-        timer.current = null;
-      }
+      if (timer.current) clearInterval(timer.current);
     };
-  }, [index, interval, images.length]);
+  }, [interval, images.length]);
 
-  const scrollToIndex = (i: number): void => {
-    flatListRef.current?.scrollToOffset({
-      offset: i * HERO_WIDTH,
-      animated: true,
-    });
-    setIndex(i);
-  };
-
-  const handleScrollEnd = (
-    e: NativeSyntheticEvent<NativeScrollEvent>
-  ): void => {
+  const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const newIndex = Math.round(e.nativeEvent.contentOffset.x / HERO_WIDTH);
     setIndex(newIndex);
   };
 
   return (
-    <View style={[styles.section, { backgroundColor: SECTION_BG }]}>
+    <Section variant={variant} pad={false}>
+      <Text style={[styles.title, { color: text }]}>Happening Today</Text>
+
       <FlatList
         ref={flatListRef}
         data={images}
@@ -90,7 +83,7 @@ export default function AdCarousel({
                 resizeMode="cover"
               >
                 <LinearGradient
-                  colors={["rgba(0,0,0,0.25)", "rgba(0,0,0,0.65)"]}
+                  colors={["rgba(0,0,0,0.15)", "rgba(0,0,0,0.55)"]}
                   style={styles.gradient}
                 />
               </ImageBackground>
@@ -103,7 +96,12 @@ export default function AdCarousel({
         {images.map((_, i) => (
           <TouchableOpacity
             key={i}
-            onPress={() => scrollToIndex(i)}
+            onPress={() =>
+              flatListRef.current?.scrollToOffset({
+                offset: i * HERO_WIDTH,
+                animated: true,
+              })
+            }
             activeOpacity={0.7}
           >
             <View
@@ -111,50 +109,56 @@ export default function AdCarousel({
                 styles.dot,
                 {
                   opacity: i === index ? 1 : 0.3,
-                  backgroundColor: COLORS.accent,
+                  backgroundColor: accent,
                 },
               ]}
             />
           </TouchableOpacity>
         ))}
       </View>
-    </View>
+    </Section>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    width: "100%",
-    alignItems: "center",
-    paddingVertical: 24,
+  title: {
+    fontSize: 19,
+    fontWeight: "900",
+    letterSpacing: 0.3,
+    lineHeight: 24,
+    paddingHorizontal: LAYOUT.H_PADDING,
+    marginBottom: 16,
+    alignSelf: "flex-start",
   },
   cardWrapper: {
     width: HERO_WIDTH,
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: LAYOUT.H_PADDING,
   },
   card: {
     width: "100%",
-    height: HERO_HEIGHT, // ✅ new reduced height
+    height: HERO_HEIGHT,
     overflow: "hidden",
+    borderRadius: LAYOUT.RADIUS.card,
   },
   image: {
     flex: 1,
     justifyContent: "flex-end",
+    backgroundColor: "#EDEDED",
   },
   gradient: {
     ...StyleSheet.absoluteFillObject,
   },
   dots: {
     position: "absolute",
-    bottom: 14,
+    bottom: LAYOUT.V_SPACING.sm,
     width: "100%",
     flexDirection: "row",
     justifyContent: "center",
+    gap: 6,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginHorizontal: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
 });

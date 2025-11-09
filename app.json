@@ -1,32 +1,51 @@
 {
   "expo": {
-    "name": "pearlfm",
+    "name": "Pearl Of Africa Radio",
     "slug": "pearlfm",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "pearlfm",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-
     "updates": {
       "enabled": false
     },
-
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FE7C1C"
     },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "ug.pearlfm.app"
     },
     "android": {
+      "package": "ug.pearlfm.app",
+      "versionCode": 1,
+      "permissions": [],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FE7C1C"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            { "scheme": "https", "host": "pearlfm.ug" },
+            { "scheme": "pearlfm" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
+    },
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"

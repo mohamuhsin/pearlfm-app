@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from "react-native";
-import { COLORS } from "../theme/colors";
+import { COLORS } from "../../theme/colors";
 
 interface ComingSoonProps {
   title?: string;
@@ -10,13 +10,6 @@ interface ComingSoonProps {
   textStyle?: TextStyle;
 }
 
-/**
- * 🚧 ComingSoon — Pulse Edition
- * ------------------------------------------------------------
- * • Uses Pearl FM’s maroon base (#2E0B0F)
- * • Gold accent title (#FFCB05)
- * • Soft white supporting text
- */
 export default function ComingSoon({
   title = "🚧 Coming Soon 🚧",
   message = "This feature is still under construction.",
@@ -36,7 +29,7 @@ export default function ComingSoon({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.primary, // deep maroon
+    backgroundColor: COLORS.primary,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
@@ -48,7 +41,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "800",
-    color: COLORS.accent, // gold highlight
+    color: COLORS.accent,
     textAlign: "center",
     marginBottom: 8,
     letterSpacing: 0.3,

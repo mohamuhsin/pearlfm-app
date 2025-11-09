@@ -7,36 +7,27 @@ import {
   Platform,
   StatusBar,
   Image,
-  LayoutChangeEvent,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Bell } from "lucide-react-native";
 import { BlurView } from "expo-blur";
-import { COLORS } from "../theme/colors";
+import NotificationModal from "../modals/NotificationModal";
+import { COLORS } from "../../theme/colors";
 
 interface TopBarProps {
   variant?: "light" | "dark";
-  onPressNotifications?: () => void;
 }
 
-export default function TopBar({ variant, onPressNotifications }: TopBarProps) {
+export default function TopBar({ variant }: TopBarProps) {
+  const [showModal, setShowModal] = useState(false);
   const scheme = useColorScheme();
   const isDarkScheme = scheme === "dark";
   const isLight = variant === "light" || (!variant && !isDarkScheme);
 
-  // 🎨 Colors
   const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
   const ACCENT = COLORS.accent;
   const ICON = COLORS.white;
 
-  const [leftOffset, setLeftOffset] = useState(0);
-
-  const handleLogoLayout = (e: LayoutChangeEvent) => {
-    const { x } = e.nativeEvent.layout;
-    if (x > 0) setLeftOffset(-x);
-  };
-
-  // 🪟 Platform container (blur for iOS, solid for Android)
   const Container =
     Platform.OS === "ios"
       ? ({ children }: { children: React.ReactNode }) => (
@@ -49,12 +40,7 @@ export default function TopBar({ variant, onPressNotifications }: TopBarProps) {
           </BlurView>
         )
       : ({ children }: { children: React.ReactNode }) => (
-          <View
-            style={[
-              styles.container,
-              { backgroundColor: BG }, // ✅ unified with theme
-            ]}
-          >
+          <View style={[styles.container, { backgroundColor: BG }]}>
             {children}
           </View>
         );
@@ -68,31 +54,29 @@ export default function TopBar({ variant, onPressNotifications }: TopBarProps) {
       />
 
       <SafeAreaView edges={["top", "left", "right"]}>
-        {/* 🔸 Accent line */}
         <View style={[styles.separator, { backgroundColor: ACCENT }]} />
 
         <Container>
-          {/* 🖼️ Logo */}
           <Image
-            onLayout={handleLogoLayout}
-            source={require("../assets/logo.png")}
-            style={[styles.logo, { marginLeft: leftOffset }]}
+            source={require("../../assets/logo.png")}
+            style={styles.logo}
             resizeMode="contain"
           />
 
-          {/* 🔔 Notifications */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={
-              onPressNotifications ||
-              (() => console.log("Notifications pressed"))
-            }
+            onPress={() => setShowModal(true)}
             style={styles.iconButton}
           >
-            <Bell size={26} color={ICON} strokeWidth={2.3} />
+            <Bell size={24} color={ICON} strokeWidth={2.3} />
           </TouchableOpacity>
         </Container>
       </SafeAreaView>
+
+      <NotificationModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+      />
     </View>
   );
 }
@@ -102,34 +86,35 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     overflow: "hidden",
     ...Platform.select({
-      android: { elevation: 8 },
+      android: { elevation: 6 },
       ios: {
         shadowColor: "#00000040",
-        shadowOpacity: 0.18,
+        shadowOpacity: 0.15,
         shadowOffset: { width: 0, height: 3 },
         shadowRadius: 4,
       },
     }),
   },
   separator: {
-    height: 3,
-    width: "100%",
+    height: 2.5,
+    width: "110%",
+    marginLeft: -20,
   },
   container: {
-    height: 68,
+    height: 60,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 22,
+    paddingRight: 20,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.1)",
+    borderBottomColor: "rgba(255,255,255,0.08)",
   },
   logo: {
-    width: 145,
-    height: 46,
+    width: 180,
+    height: 54,
+    marginLeft: -20,
   },
   iconButton: {
-    marginRight: -2,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
