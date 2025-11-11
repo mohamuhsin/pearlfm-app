@@ -24,6 +24,7 @@ import EventsScreen from "../screens/Secondary/EventsScreen";
 import ShopScreen from "../screens/Secondary/ShopScreen";
 import PartnersScreen from "../screens/Secondary/PartnersScreen";
 import NotificationsScreen from "../screens/Secondary/NotificationsScreen";
+import ServicesScreen from "../screens/Secondary/ServicesScreen";
 
 import { useThemeContext } from "../context/ThemeContext";
 
@@ -68,6 +69,7 @@ export default function RootNavigator() {
             <Stack.Screen name="Events" component={EventsScreen} />
             <Stack.Screen name="Shop" component={ShopScreen} />
             <Stack.Screen name="Partners" component={PartnersScreen} />
+            <Stack.Screen name="Services" component={ServicesScreen} />
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}

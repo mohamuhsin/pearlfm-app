@@ -1,10 +1,10 @@
 /**
  * ============================================================
- *  🔗 TopCategories — Pearl FM Mobile (Monochrome Final)
+ *  💳 TopCategories — Pearl FM Mobile (Monochrome Final v2)
  * ------------------------------------------------------------
  *  • Icons & labels are black in light mode, white in dark
  *  • Keeps accent shadows & surface depth
- *  • Aligned perfectly with Programs & Home grid
+ *  • "Pay a Service" replaces "Partners"
  * ============================================================
  */
 
@@ -23,8 +23,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import {
   PlayCircle,
   ShoppingBag,
-  Handshake,
   CalendarDays,
+  CreditCard,
 } from "lucide-react-native";
 import Section from "../reusable/Sections";
 import { useTheme } from "../../hooks/useTheme";
@@ -64,9 +64,9 @@ export default function TopCategories() {
     },
     {
       id: 4,
-      name: "Partners",
-      icon: Handshake,
-      action: () => navigation.navigate("Partners"),
+      name: "Services",
+      icon: CreditCard,
+      action: () => navigation.navigate("Services"),
     },
   ];
 

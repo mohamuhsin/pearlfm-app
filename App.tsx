@@ -1,11 +1,17 @@
 import React from "react";
 import { StatusBar, View, ActivityIndicator, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as SystemUI from "expo-system-ui";
 import RootNavigator from "./navigation/RootNavigator";
 import { ThemeProvider, useThemeContext } from "./context/ThemeContext";
 
 function ThemedApp() {
   const { colors, isDark, isLoaded } = useThemeContext();
+
+  // 🟡 Sync Android system background with theme
+  React.useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.background);
+  }, [colors.background]);
 
   if (!isLoaded) {
     return (

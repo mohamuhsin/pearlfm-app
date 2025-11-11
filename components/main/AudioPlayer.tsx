@@ -1,11 +1,11 @@
 /**
  * ============================================================
- *  🎧 AudioPlayerButton — Pearl FM Mobile (Light Flat Contrast)
+ *  🎧 AudioPlayerButton — Pearl FM Mobile (Expo Audio Stable)
  * ------------------------------------------------------------
- *  • Slightly lighter fill in dark mode (#2A2A3D)
- *  • Pure white icons in dark mode, pure black in light mode
- *  • Accent border when playing
- *  • Flat, clean, modern — no shadows or elevation
+ *  • Global sync (only one button plays at a time)
+ *  • TypeScript-safe for expo-audio@1.x
+ *  • Works in background (native build / EAS)
+ *  • Flat adaptive visuals (light/dark)
  * ============================================================
  */
 
@@ -17,10 +17,26 @@ import {
   Animated,
   Easing,
   StyleSheet,
+  AppState,
+  AppStateStatus,
 } from "react-native";
 import { Play, Pause } from "lucide-react-native";
 import { useAudioPlayer } from "expo-audio";
 import { useTheme } from "../../hooks/useTheme";
+
+// 🟩 Global store to coordinate all player buttons
+const globalAudioStore = {
+  currentUrl: null as string | null,
+  listeners: new Set<(url: string | null) => void>(),
+  set(url: string | null) {
+    this.currentUrl = url;
+    this.listeners.forEach((fn) => fn(url));
+  },
+  subscribe(fn: (url: string | null) => void) {
+    this.listeners.add(fn);
+    return () => this.listeners.delete(fn);
+  },
+};
 
 interface AudioPlayerButtonProps {
   streamUrl: string;
@@ -31,13 +47,39 @@ export default function AudioPlayerButton({
 }: AudioPlayerButtonProps) {
   const player = useAudioPlayer(streamUrl);
   const [loading, setLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const pulse = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef<Animated.CompositeAnimation | null>(null);
-  const { background, accent, border, isLight } = useTheme();
+  const { background, accent, isLight } = useTheme();
 
-  const isPlaying = player.playing;
+  // 🔁 Keep UI synced with player + global control
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsPlaying(player.playing);
+    }, 400);
 
-  // 🔁 Pulse animation only when NOT playing
+    const unsub = globalAudioStore.subscribe((url) => {
+      if (url !== streamUrl && player.playing) {
+        player.pause();
+      }
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsub();
+    };
+  }, [player, streamUrl]);
+
+  // 🧭 Handle app state (refresh when active again)
+  useEffect(() => {
+    const handleAppStateChange = (state: AppStateStatus) => {
+      if (state === "active") setIsPlaying(player.playing);
+    };
+    const sub = AppState.addEventListener("change", handleAppStateChange);
+    return () => sub.remove();
+  }, [player]);
+
+  // 🟣 Subtle pulse animation for idle state
   useEffect(() => {
     if (!isPlaying) {
       pulseAnim.current = Animated.loop(
@@ -63,27 +105,30 @@ export default function AudioPlayerButton({
     }
   }, [isPlaying]);
 
-  // ▶️ / ⏸ Toggle playback
+  // ▶️ / ⏸ Toggle playback globally
   async function togglePlayback() {
     try {
       setLoading(true);
-      if (player.playing) await player.pause();
-      else await player.play();
+
+      if (player.playing) {
+        await player.pause();
+        globalAudioStore.set(null);
+      } else {
+        globalAudioStore.set(streamUrl);
+        await player.play();
+      }
     } catch (err) {
       console.error("Playback error:", err);
     } finally {
       setLoading(false);
+      setIsPlaying(player.playing);
     }
   }
 
-  // 🎨 Updated flat palette
-  const BG = isLight ? background : "#2A2A3D"; // ✨ lighter dark mode surface
-  const BORDER = isPlaying ? accent : isLight ? "#D1D5DB" : "#3A3A50"; // subtle border for separation
-  const ICON = isPlaying
-    ? accent
-    : isLight
-    ? "#000000" // black in light mode
-    : "#FFFFFF"; // white in dark mode
+  // 🎨 Visuals
+  const BG = isLight ? background : "#2A2A3D";
+  const BORDER = isPlaying ? accent : isLight ? "#D1D5DB" : "#3A3A50";
+  const ICON = isPlaying ? accent : isLight ? "#000000" : "#FFFFFF";
 
   return (
     <View style={styles.container}>
@@ -114,6 +159,7 @@ export default function AudioPlayerButton({
   );
 }
 
+// 💅 Styles
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
