@@ -1,3 +1,14 @@
+/**
+ * ============================================================
+ *  🎤 HappeningToday — Pearl FM Mobile (Fixed-Dots Final)
+ * ------------------------------------------------------------
+ *  • Dots are visually inside the image (not below)
+ *  • Stay fixed while scrolling
+ *  • Perfect grid alignment with Programs & AdCarousel
+ *  • Shadows & gradients fully visible
+ * ============================================================
+ */
+
 import React, { useRef, useState, useEffect } from "react";
 import {
   View,
@@ -6,23 +17,21 @@ import {
   ImageBackground,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  LayoutChangeEvent,
+  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Section from "../reusable/Sections";
-import { useAppTheme } from "../../hooks/useAppTheme";
+import { useTheme } from "../../hooks/useTheme";
 import { LAYOUT } from "../../theme/layout";
 
-const { width } = Dimensions.get("window");
-const HERO_WIDTH = width;
 const HERO_HEIGHT = 150;
 
 interface HappeningTodayProps {
   images?: string[];
   interval?: number;
-  variant?: "light" | "dark";
 }
 
 export default function HappeningToday({
@@ -32,126 +41,144 @@ export default function HappeningToday({
     "https://i.pinimg.com/736x/a4/0e/fb/a40efb96321c84cf44e64a1847b6fbc7.jpg",
   ],
   interval = 5000,
-  variant = "light",
 }: HappeningTodayProps) {
   const [index, setIndex] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const flatListRef = useRef<FlatList<string>>(null);
-  const timer = useRef<NodeJS.Timeout | null>(null);
-  const { text, accent } = useAppTheme(variant);
+  const { accent, isLight, text } = useTheme();
 
+  // 📏 Measure available width
+  const handleLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w !== containerWidth) setContainerWidth(w);
+  };
+
+  // 🔁 Auto-scroll with cleanup
   useEffect(() => {
-    timer.current = setInterval(() => {
-      setIndex((prev) => {
-        const next = (prev + 1) % images.length;
-        flatListRef.current?.scrollToOffset({
-          offset: next * HERO_WIDTH,
-          animated: true,
-        });
-        return next;
+    if (!containerWidth) return;
+    const id = setInterval(() => {
+      const next = (index + 1) % images.length;
+      flatListRef.current?.scrollToOffset({
+        offset: next * containerWidth,
+        animated: true,
       });
+      setIndex(next);
     }, interval);
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, [interval, images.length]);
+    return () => clearInterval(id);
+  }, [index, interval, images.length, containerWidth]);
 
+  // 🧭 Manual scroll update
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const newIndex = Math.round(e.nativeEvent.contentOffset.x / HERO_WIDTH);
+    if (!containerWidth) return;
+    const newIndex = Math.round(e.nativeEvent.contentOffset.x / containerWidth);
     setIndex(newIndex);
   };
 
+  const gradientColors = isLight
+    ? (["rgba(0,0,0,0.1)", "rgba(0,0,0,0.45)"] as const)
+    : (["rgba(0,0,0,0.25)", "rgba(0,0,0,0.65)"] as const);
+
   return (
-    <Section variant={variant} pad={false}>
+    <Section pad={false} onLayout={handleLayout} style={styles.section}>
       <Text style={[styles.title, { color: text }]}>Happening Today</Text>
 
-      <FlatList
-        ref={flatListRef}
-        data={images}
-        keyExtractor={(_, i) => i.toString()}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        decelerationRate="fast"
-        bounces={false}
-        onMomentumScrollEnd={handleScrollEnd}
-        renderItem={({ item }) => (
-          <View style={styles.cardWrapper}>
-            <View style={styles.card}>
+      {containerWidth > 0 && (
+        <View style={[styles.carouselWrapper, { height: HERO_HEIGHT }]}>
+          {/* 🎤 Carousel */}
+          <FlatList
+            ref={flatListRef}
+            data={images}
+            keyExtractor={(_, i) => i.toString()}
+            horizontal
+            pagingEnabled
+            decelerationRate="fast"
+            showsHorizontalScrollIndicator={false}
+            bounces={false}
+            onMomentumScrollEnd={handleScrollEnd}
+            renderItem={({ item }) => (
               <ImageBackground
                 source={{ uri: item }}
-                style={styles.image}
+                style={[
+                  styles.card,
+                  { width: containerWidth, height: HERO_HEIGHT },
+                ]}
                 resizeMode="cover"
               >
                 <LinearGradient
-                  colors={["rgba(0,0,0,0.15)", "rgba(0,0,0,0.55)"]}
-                  style={styles.gradient}
+                  colors={gradientColors}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 0, y: 1 }}
+                  style={StyleSheet.absoluteFillObject}
                 />
               </ImageBackground>
-            </View>
-          </View>
-        )}
-      />
+            )}
+          />
 
-      <View style={styles.dots}>
-        {images.map((_, i) => (
-          <TouchableOpacity
-            key={i}
-            onPress={() =>
-              flatListRef.current?.scrollToOffset({
-                offset: i * HERO_WIDTH,
-                animated: true,
-              })
-            }
-            activeOpacity={0.7}
-          >
-            <View
-              style={[
-                styles.dot,
-                {
-                  opacity: i === index ? 1 : 0.3,
-                  backgroundColor: accent,
-                },
-              ]}
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
+          {/* 🔘 Pagination Dots — fixed inside frame */}
+          <View style={styles.dots}>
+            {images.map((_, i) => (
+              <TouchableOpacity
+                key={i}
+                activeOpacity={0.7}
+                onPress={() =>
+                  flatListRef.current?.scrollToOffset({
+                    offset: i * containerWidth,
+                    animated: true,
+                  })
+                }
+              >
+                <View
+                  style={[
+                    styles.dot,
+                    {
+                      opacity: i === index ? 1 : 0.3,
+                      backgroundColor: accent,
+                    },
+                  ]}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
     </Section>
   );
 }
 
 const styles = StyleSheet.create({
+  section: {
+    paddingHorizontal: 0,
+  },
   title: {
     fontSize: 19,
     fontWeight: "900",
     letterSpacing: 0.3,
-    lineHeight: 24,
-    paddingHorizontal: LAYOUT.H_PADDING,
     marginBottom: 16,
     alignSelf: "flex-start",
   },
-  cardWrapper: {
-    width: HERO_WIDTH,
-    paddingHorizontal: LAYOUT.H_PADDING,
+  carouselWrapper: {
+    position: "relative",
+    width: "100%",
+    overflow: "hidden",
   },
   card: {
-    width: "100%",
-    height: HERO_HEIGHT,
-    overflow: "hidden",
-    borderRadius: LAYOUT.RADIUS.card,
-  },
-  image: {
-    flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "#EDEDED",
-  },
-  gradient: {
-    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden",
+    ...Platform.select({
+      android: { elevation: 4 },
+      ios: {
+        shadowColor: "#00000030",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3,
+      },
+    }),
   },
   dots: {
     position: "absolute",
-    bottom: LAYOUT.V_SPACING.sm,
-    width: "100%",
+    bottom: LAYOUT.V_SPACING.sm, // ✅ dots sit inside image
+    left: 0,
+    right: 0,
     flexDirection: "row",
     justifyContent: "center",
     gap: 6,

@@ -2,25 +2,22 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import BackHeader from "../../components/reusable/BackHeader";
 import ComingSoon from "../../components/reusable/ComingSoon";
-import { COLORS } from "../../theme/colors";
+import { useTheme } from "../../hooks/useTheme";
 
 export default function TicketsScreen() {
-  return (
-    <View style={styles.root}>
-      <BackHeader title="Tickets" variant="light" showDone />
+  const { background } = useTheme();
 
+  return (
+    <View style={[styles.root, { backgroundColor: background }]}>
+      <BackHeader title="Tickets" />
       <ComingSoon
-        emoji="🎟️"
-        title="Tickets Coming Soon"
-        message="Soon you'll be able to book, buy, and manage event tickets directly through Pearl FM."
+        title="Tickets"
+        message="Book and manage event tickets here soon."
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.primary,
-  },
+  root: { flex: 1 },
 });

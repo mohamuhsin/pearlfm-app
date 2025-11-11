@@ -1,3 +1,8 @@
+/**
+ * NotificationModal — Pearl FM Mobile
+ * Theme-aware modal overlay for app notifications.
+ */
+
 import React from "react";
 import {
   Modal,
@@ -9,7 +14,7 @@ import {
   Platform,
 } from "react-native";
 import { BlurView } from "expo-blur";
-import { COLORS } from "../../theme/colors";
+import { useTheme } from "../../hooks/useTheme";
 
 interface NotificationModalProps {
   visible: boolean;
@@ -20,27 +25,46 @@ export default function NotificationModal({
   visible,
   onClose,
 }: NotificationModalProps) {
+  const { isLight, surface, text, muted, accent } = useTheme();
+
+  // 🎨 Themed styles
+  const blurTint = isLight ? "light" : "dark";
+  const overlayBG = "rgba(0,0,0,0.35)";
+  const modalBG = isLight ? "rgba(255,255,255,0.95)" : "rgba(20,20,35,0.95)";
+  const closeBG = isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.08)";
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <BlurView intensity={85} tint="light" style={styles.blurContainer}>
-          <View style={styles.modalBox}>
-            <Text style={styles.title}>Notifications</Text>
+      <Pressable
+        style={[styles.overlay, { backgroundColor: overlayBG }]}
+        onPress={onClose}
+      >
+        <BlurView intensity={85} tint={blurTint} style={styles.blurContainer}>
+          <View style={[styles.modalBox, { backgroundColor: modalBG }]}>
+            {/* Header */}
+            <Text style={[styles.title, { color: accent }]}>Notifications</Text>
 
+            {/* Message */}
             <View style={styles.content}>
-              <Text style={styles.empty}>🔔 You're all caught up</Text>
-              <Text style={styles.subtext}>
-                No new notifications at the moment.
+              <Text style={[styles.empty, { color: text }]}>All caught up</Text>
+              <Text style={[styles.subtext, { color: muted }]}>
+                You have no new notifications right now.
               </Text>
             </View>
 
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeText}>Close</Text>
+            {/* Close button */}
+            <TouchableOpacity
+              onPress={onClose}
+              activeOpacity={0.85}
+              style={[styles.closeButton, { backgroundColor: closeBG }]}
+            >
+              <Text style={[styles.closeText, { color: text }]}>Close</Text>
             </TouchableOpacity>
           </View>
         </BlurView>
@@ -52,7 +76,6 @@ export default function NotificationModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.25)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -60,42 +83,46 @@ const styles = StyleSheet.create({
     width: "85%",
     borderRadius: 20,
     overflow: "hidden",
+    ...Platform.select({
+      android: { elevation: 8 },
+      ios: {
+        shadowColor: "#00000040",
+        shadowOpacity: 0.15,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 6,
+      },
+    }),
   },
   modalBox: {
-    backgroundColor: "rgba(255,255,255,0.96)",
     paddingVertical: 28,
     paddingHorizontal: 24,
-    borderRadius: 20,
     alignItems: "center",
   },
   title: {
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: "700",
-    color: COLORS.text,
     marginBottom: 16,
   },
   content: {
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 22,
   },
   empty: {
     fontSize: 16,
-    color: COLORS.text,
     fontWeight: "600",
   },
   subtext: {
     marginTop: 6,
-    color: COLORS.muted,
     fontSize: 14,
+    textAlign: "center",
+    opacity: 0.8,
   },
   closeButton: {
-    backgroundColor: "rgba(0,0,0,0.05)",
     paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     borderRadius: 18,
   },
   closeText: {
-    color: COLORS.text,
     fontWeight: "600",
     fontSize: 14,
   },

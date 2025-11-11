@@ -1,34 +1,46 @@
-import React from "react";
+/**
+ * ============================================================
+ *  🔗 TopCategories — Pearl FM Mobile (Monochrome Final)
+ * ------------------------------------------------------------
+ *  • Icons & labels are black in light mode, white in dark
+ *  • Keeps accent shadows & surface depth
+ *  • Aligned perfectly with Programs & Home grid
+ * ============================================================
+ */
+
+import React, { useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Animated,
   Linking,
+  Platform,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { COLORS } from "../../theme/colors";
-import Section from "../reusable/Sections";
 import {
   PlayCircle,
   ShoppingBag,
   Handshake,
   CalendarDays,
 } from "lucide-react-native";
-import { useAppTheme } from "../../hooks/useAppTheme";
+import Section from "../reusable/Sections";
+import { useTheme } from "../../hooks/useTheme";
 import { RootStackParamList } from "../../navigation/types";
+import { LAYOUT } from "../../theme/layout";
 
-interface TopCategoriesProps {
-  variant?: "light" | "dark";
-}
-
-export default function TopCategories({ variant }: TopCategoriesProps) {
-  const { text } = useAppTheme(variant);
+export default function TopCategories() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { isLight, accent, surface, border } = useTheme();
 
-  const ICON_BG = "#1F2431";
-  const ICON_COLOR = COLORS.white;
+  // 🎨 Pure black/white logic
+  const ICON_COLOR = isLight ? "#000000" : "#FFFFFF";
+  const LABEL_COLOR = isLight ? "#000000" : "#FFFFFF";
+
+  const ICON_BG = isLight ? "#F5F6FA" : surface;
+  const ICON_BORDER = isLight ? "#E6E8EE" : border;
 
   const categories = [
     {
@@ -59,29 +71,55 @@ export default function TopCategories({ variant }: TopCategoriesProps) {
   ];
 
   return (
-    <Section title="Top Actions" variant={variant}>
+    <Section title="Top Actions" pad={false}>
       <View style={styles.row}>
-        {categories.map(({ id, name, icon: Icon, action }) => (
-          <TouchableOpacity
-            key={id}
-            activeOpacity={0.9}
-            onPress={action}
-            style={styles.item}
-          >
-            <View
-              style={[
-                styles.iconWrapper,
-                {
-                  backgroundColor: ICON_BG,
-                  borderColor: "rgba(255,255,255,0.08)",
-                },
-              ]}
+        {categories.map(({ id, name, icon: Icon, action }) => {
+          const scale = useRef(new Animated.Value(1)).current;
+
+          const animate = (to: number) => {
+            Animated.spring(scale, {
+              toValue: to,
+              useNativeDriver: true,
+              speed: 25,
+              bounciness: 7,
+            }).start();
+          };
+
+          return (
+            <TouchableWithoutFeedback
+              key={id}
+              onPressIn={() => animate(0.95)}
+              onPressOut={() => animate(1)}
+              onPress={action}
             >
-              <Icon size={24} color={ICON_COLOR} strokeWidth={2.3} />
-            </View>
-            <Text style={[styles.label, { color: text }]}>{name}</Text>
-          </TouchableOpacity>
-        ))}
+              <Animated.View style={[styles.item, { transform: [{ scale }] }]}>
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    {
+                      backgroundColor: ICON_BG,
+                      borderColor: ICON_BORDER,
+                      ...Platform.select({
+                        ios: {
+                          shadowColor: accent,
+                          shadowOpacity: 0.1,
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowRadius: 4,
+                        },
+                        android: { elevation: 2 },
+                      }),
+                    },
+                  ]}
+                >
+                  <Icon size={24} color={ICON_COLOR} strokeWidth={2.2} />
+                </View>
+                <Text style={[styles.label, { color: LABEL_COLOR }]}>
+                  {name}
+                </Text>
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          );
+        })}
       </View>
     </Section>
   );
@@ -91,6 +129,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: 8,
+    paddingBottom: LAYOUT.V_SPACING.sm,
   },
   item: {
     flex: 1,
@@ -99,23 +139,18 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     width: 72,
-    height: 44,
-    borderRadius: 22,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    shadowColor: "#00000040",
-    shadowOffset: { width: 0, height: 1.5 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2.5,
-    elevation: 3,
   },
   label: {
     fontSize: 11,
-    fontWeight: "800",
-    letterSpacing: 0.2,
+    fontWeight: "700",
+    letterSpacing: 0.15,
     lineHeight: 14,
-    marginTop: 4,
+    marginTop: 6,
     textAlign: "center",
   },
 });

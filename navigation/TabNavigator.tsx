@@ -7,17 +7,13 @@ import HomeScreen from "../screens/Primary/HomeScreen";
 import CharityScreen from "../screens/Primary/CharityScreen";
 import TicketsScreen from "../screens/Primary/TicketsScreen";
 import AccountScreen from "../screens/Primary/AccountScreen";
-import { TabParamList } from "./types";
 import AudioPlayerButton from "../components/main/AudioPlayer";
+import { TabParamList } from "./types";
+import { useThemeContext } from "../context/ThemeContext";
 
-const TAB_THEME = {
-  background: "#1a1a1a",
-  active: "#FFFFFF",
-  inactive: "#9CA3AF",
-  border: "#1a1a1a",
-};
+const Tab = createBottomTabNavigator<TabParamList>();
 
-const TAB_HEIGHT = Platform.select({ ios: 86, android: 74 }) as number;
+const TAB_HEIGHT = Platform.select({ ios: 84, android: 72 }) as number;
 const TAB_PADDING_TOP = 10;
 const TAB_PADDING_BOTTOM = 6;
 const ICON_SHIFT_Y = Platform.select({ ios: 2, android: 2.5 }) as number;
@@ -36,31 +32,35 @@ const LABELS: Record<string, string> = {
   Account: "Account",
 };
 
-const Tab = createBottomTabNavigator<TabParamList>();
-
 export default function TabNavigator() {
   const STREAM_URL = "https://dc4.serverse.com/proxy/pearlfm/stream";
+  const { colors, isLight } = useThemeContext();
+
+  const ACTIVE_COLOR = colors.accent;
+  const INACTIVE_COLOR = isLight ? "#000000" : "#FFFFFF";
+  const BG_COLOR = colors.surface;
+  const BORDER_COLOR = colors.border;
 
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: TAB_THEME.active,
-        tabBarInactiveTintColor: TAB_THEME.inactive,
+        tabBarActiveTintColor: ACTIVE_COLOR,
+        tabBarInactiveTintColor: INACTIVE_COLOR,
         tabBarHideOnKeyboard: true,
         tabBarLabel: () => null,
         tabBarStyle: {
-          backgroundColor: TAB_THEME.background,
+          backgroundColor: BG_COLOR,
           borderTopWidth: 1,
-          borderTopColor: TAB_THEME.border,
+          borderTopColor: BORDER_COLOR,
           height: TAB_HEIGHT,
           paddingTop: TAB_PADDING_TOP,
           paddingBottom: TAB_PADDING_BOTTOM,
-          elevation: 10,
-          shadowColor: "#000",
-          shadowOpacity: 0.45,
-          shadowOffset: { width: 0, height: -3 },
-          shadowRadius: 8,
+          elevation: isLight ? 10 : 0,
+          shadowColor: isLight ? "#000" : "#fff",
+          shadowOpacity: isLight ? 0.12 : 0.05,
+          shadowOffset: { width: 0, height: -2 },
+          shadowRadius: 6,
         },
         tabBarIcon: ({ color, focused }) => {
           if (route.name === "Radio") return null;
@@ -76,17 +76,17 @@ export default function TabNavigator() {
               }}
             >
               <Icon
-                size={focused ? 30 : 28}
+                size={focused ? 30 : 27}
                 color={color}
-                strokeWidth={focused ? 2.4 : 2.2}
+                strokeWidth={focused ? 2.4 : 2.1}
               />
               <Text
                 style={{
-                  fontSize: 10,
+                  fontSize: 10.5,
                   marginTop: 2,
                   fontWeight: focused ? "700" : "500",
                   color,
-                  letterSpacing: 0.1,
+                  letterSpacing: 0.2,
                   textAlign: "center",
                 }}
               >
@@ -98,6 +98,7 @@ export default function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
+
       <Tab.Screen name="Charity" component={CharityScreen} />
 
       <Tab.Screen
@@ -109,6 +110,7 @@ export default function TabNavigator() {
       />
 
       <Tab.Screen name="Tickets" component={TicketsScreen} />
+
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
   );

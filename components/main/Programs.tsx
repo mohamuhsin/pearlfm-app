@@ -1,3 +1,13 @@
+/**
+ * ============================================================
+ *  📻 Programs — Pearl FM Mobile (Final Grid-Aligned Edition)
+ * ------------------------------------------------------------
+ *  • Flat-bottom cards, no double padding
+ *  • Fixes bottom clipping (shadows + text visible)
+ *  • Matches global 24 dp vertical rhythm
+ * ============================================================
+ */
+
 import React from "react";
 import {
   Text,
@@ -9,13 +19,13 @@ import {
   View,
 } from "react-native";
 import Section from "../reusable/Sections";
-import { useAppTheme } from "../../hooks/useAppTheme";
+import { useTheme } from "../../hooks/useTheme";
 import { LAYOUT } from "../../theme/layout";
 
 export default function Programs({ variant }: { variant?: "light" | "dark" }) {
-  const { text, accent } = useAppTheme(variant);
-  const TEXT = text;
-  const CARD_BG = "#1F2431";
+  const { isLight, text, accent, surface } = useTheme();
+
+  const CARD_BG = isLight ? "#FFFFFF" : surface || "#1C1C2A";
 
   const programs = [
     {
@@ -45,75 +55,56 @@ export default function Programs({ variant }: { variant?: "light" | "dark" }) {
   ];
 
   return (
-    <Section variant={variant} pad={false}>
-      <View style={styles.wrapper}>
-        <Text style={[styles.title, { color: TEXT }]}>Programs</Text>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {programs.map((p) => (
-            <TouchableOpacity
-              key={p.id}
-              activeOpacity={0.9}
-              style={[styles.card, { backgroundColor: CARD_BG }]}
-              onPress={() => console.log("Pressed:", p.title)}
-            >
-              <Image
-                source={{ uri: p.image }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-              <View style={styles.info}>
-                <Text style={[styles.cardTitle, { color: TEXT }]}>
-                  {p.title}
-                </Text>
-                <Text style={[styles.cardTime, { color: accent }]}>
-                  {p.time}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
+    <Section title="Programs" pad={false}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {programs.map((p) => (
+          <TouchableOpacity
+            key={p.id}
+            activeOpacity={0.9}
+            style={[styles.card, { backgroundColor: CARD_BG }]}
+            onPress={() => console.log("Pressed:", p.title)}
+          >
+            <Image
+              source={{ uri: p.image }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+            <View style={styles.info}>
+              <Text style={[styles.cardTitle, { color: text }]}>{p.title}</Text>
+              <Text style={[styles.cardTime, { color: accent }]}>{p.time}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </Section>
   );
 }
 
-const CARD_WIDTH = LAYOUT.CARD.small;
+const CARD_WIDTH = 150;
 const CARD_HEIGHT = 140;
 
 const styles = StyleSheet.create({
-  wrapper: {
-    paddingTop: 0,
-    paddingBottom: LAYOUT.V_SPACING.lg,
-  },
-  title: {
-    fontSize: 19,
-    fontWeight: "900",
-    letterSpacing: 0.3,
-    paddingHorizontal: LAYOUT.H_PADDING,
-    marginBottom: 16,
-  },
   scrollContent: {
-    paddingLeft: LAYOUT.H_PADDING,
-    paddingRight: LAYOUT.H_PADDING,
+    paddingHorizontal: 0,
+    paddingBottom: LAYOUT.V_SPACING.md, // ✅ prevents shadow clipping
   },
   card: {
     width: CARD_WIDTH,
-    marginRight: LAYOUT.V_SPACING.sm,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-    borderRadius: LAYOUT.RADIUS.card,
+    marginRight: LAYOUT.V_SPACING.sm, // 12 dp gap between cards
+    marginBottom: LAYOUT.V_SPACING.xs, // ✅ small breathing below
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(255,255,255,0.08)",
+    overflow: "visible", // ✅ allows shadows
     ...Platform.select({
-      android: { elevation: 2 },
+      android: { elevation: 3 },
       ios: {
         shadowColor: "#00000040",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.25,
         shadowRadius: 3,
       },
     }),
@@ -122,12 +113,13 @@ const styles = StyleSheet.create({
     width: "100%",
     height: CARD_HEIGHT - 40,
     backgroundColor: "#EDEDED",
-    borderTopLeftRadius: LAYOUT.RADIUS.image,
-    borderTopRightRadius: LAYOUT.RADIUS.image,
+    borderTopLeftRadius: 6, // ✅ soft top edges only
+    borderTopRightRadius: 6,
   },
   info: {
     paddingTop: LAYOUT.V_SPACING.xs,
     paddingHorizontal: 4,
+    paddingBottom: 6, // ✅ ensures text not cut
   },
   cardTitle: {
     fontSize: 13,

@@ -1,37 +1,53 @@
+/**
+ * ============================================================
+ *  🧩 Section — Pearl FM Mobile (Unified Grid Final)
+ * ------------------------------------------------------------
+ *  • Standardized 19 / 900 / 0.3 typography across app
+ *  • Matches all section titles (Programs, Top Actions, etc.)
+ *  • Removes redundant spacing for grid-based parents
+ * ============================================================
+ */
+
 import React from "react";
-import { View, Text, StyleSheet, ViewStyle } from "react-native";
-import { COLORS } from "../../theme/colors";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  LayoutChangeEvent,
+} from "react-native";
+import { useTheme } from "../../hooks/useTheme";
 
 interface SectionProps {
   title?: string;
   children: React.ReactNode;
-  variant?: "light" | "dark";
   pad?: boolean;
+  surface?: boolean;
   style?: ViewStyle;
+  onLayout?: (e: LayoutChangeEvent) => void;
 }
 
 export default function Section({
   title,
   children,
-  variant = "light",
   pad = true,
+  surface = false,
   style,
+  onLayout,
 }: SectionProps) {
-  const BG = variant === "light" ? COLORS.primary : COLORS.backgroundDark;
-  const TEXT = COLORS.white;
+  const { background, surface: surfaceColor, text, isLight } = useTheme();
+
+  const backgroundColor = surface ? surfaceColor : background;
+  const titleColor = isLight ? text : "#F5F5F7";
 
   return (
     <View
-      style={[
-        styles.wrapper,
-        { backgroundColor: BG },
-        pad ? styles.padded : null,
-        style,
-      ]}
+      onLayout={onLayout}
+      style={[styles.wrapper, { backgroundColor }, pad && styles.padded, style]}
     >
-      {title ? (
-        <Text style={[styles.title, { color: TEXT }]}>{title}</Text>
-      ) : null}
+      {title && (
+        <Text style={[styles.title, { color: titleColor }]}>{title}</Text>
+      )}
       {children}
     </View>
   );
@@ -40,16 +56,19 @@ export default function Section({
 const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
+    alignSelf: "stretch",
+    backgroundColor: "transparent",
   },
   padded: {
-    paddingTop: 18,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "900",
+    fontSize: 19, // ✅ unified title size
+    fontWeight: "900", // ✅ same bold weight as all section headers
     letterSpacing: 0.3,
+    lineHeight: 24,
     marginBottom: 16,
+    textAlign: "left",
   },
 });

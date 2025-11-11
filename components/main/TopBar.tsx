@@ -1,38 +1,44 @@
+/**
+ * ============================================================
+ *  🔝 TopBar — Pearl FM Mobile (Compact Logo Edition)
+ * ------------------------------------------------------------
+ *  • Bell icon: black in light mode, white in dark mode
+ *  • Logo reduced for better balance & alignment
+ *  • Accent unread dot stays vivid & glowing
+ *  • Blur (iOS) / solid (Android) preserved
+ * ============================================================
+ */
+
 import React, { useState } from "react";
 import {
   View,
   TouchableOpacity,
   StyleSheet,
-  useColorScheme,
   Platform,
   StatusBar,
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Bell } from "lucide-react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import NotificationModal from "../modals/NotificationModal";
-import { COLORS } from "../../theme/colors";
+import { useTheme } from "../../hooks/useTheme";
 
-interface TopBarProps {
-  variant?: "light" | "dark";
-}
-
-export default function TopBar({ variant }: TopBarProps) {
+export default function TopBar() {
   const [showModal, setShowModal] = useState(false);
-  const scheme = useColorScheme();
-  const isDarkScheme = scheme === "dark";
-  const isLight = variant === "light" || (!variant && !isDarkScheme);
+  const [hasUnread, setHasUnread] = useState(true);
+  const { surface, border, accent, isLight } = useTheme();
 
-  const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
-  const ACCENT = COLORS.accent;
-  const ICON = COLORS.white;
+  const statusStyle = isLight ? "dark-content" : "light-content";
+  const iconColor = isLight ? "#000000" : "#FFFFFF";
 
+  // 🍏 Platform-specific container
   const Container =
     Platform.OS === "ios"
       ? ({ children }: { children: React.ReactNode }) => (
           <BlurView
-            intensity={40}
+            intensity={35}
             tint={isLight ? "light" : "dark"}
             style={[styles.container, { backgroundColor: "transparent" }]}
           >
@@ -40,7 +46,15 @@ export default function TopBar({ variant }: TopBarProps) {
           </BlurView>
         )
       : ({ children }: { children: React.ReactNode }) => (
-          <View style={[styles.container, { backgroundColor: BG }]}>
+          <View
+            style={[
+              styles.container,
+              {
+                backgroundColor: isLight ? "#FDFBF7" : "#161642",
+                borderBottomColor: border,
+              },
+            ]}
+          >
             {children}
           </View>
         );
@@ -50,29 +64,57 @@ export default function TopBar({ variant }: TopBarProps) {
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle="light-content"
+        barStyle={statusStyle}
       />
 
       <SafeAreaView edges={["top", "left", "right"]}>
-        <View style={[styles.separator, { backgroundColor: ACCENT }]} />
+        {/* 🎨 Gradient accent line */}
+        <LinearGradient
+          colors={[accent, "#FFAE5F"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.separator}
+        />
 
         <Container>
+          {/* 🟣 Pearl FM Logo (Reduced Size) */}
           <Image
             source={require("../../assets/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
 
+          {/* 🔔 Notification Icon */}
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setShowModal(true)}
+            onPress={() => {
+              setShowModal(true);
+              setHasUnread(false);
+            }}
             style={styles.iconButton}
+            accessibilityRole="button"
+            accessibilityLabel="Notifications"
           >
-            <Bell size={24} color={ICON} strokeWidth={2.3} />
+            <Bell size={24} color={iconColor} strokeWidth={2.3} />
+            {hasUnread && (
+              <View
+                style={[
+                  styles.dot,
+                  {
+                    backgroundColor: accent,
+                    borderColor: surface,
+                    shadowColor: accent,
+                    shadowOpacity: 0.8,
+                    shadowRadius: 4,
+                  },
+                ]}
+              />
+            )}
           </TouchableOpacity>
         </Container>
       </SafeAreaView>
 
+      {/* 🔔 Modal */}
       <NotificationModal
         visible={showModal}
         onClose={() => setShowModal(false)}
@@ -101,23 +143,32 @@ const styles = StyleSheet.create({
     marginLeft: -20,
   },
   container: {
-    height: 60,
+    height: 56,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingRight: 20,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.08)",
   },
   logo: {
-    width: 180,
-    height: 54,
-    marginLeft: -20,
+    width: 140, // ⬅️ Reduced from 180
+    height: 40, // ⬅️ Reduced from 54
+    marginLeft: -10,
   },
   iconButton: {
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
     padding: 4,
+  },
+  dot: {
+    position: "absolute",
+    top: 4,
+    right: 6,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    borderWidth: 1,
+    elevation: 3,
   },
 });

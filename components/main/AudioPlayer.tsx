@@ -1,3 +1,14 @@
+/**
+ * ============================================================
+ *  🎧 AudioPlayerButton — Pearl FM Mobile (Light Flat Contrast)
+ * ------------------------------------------------------------
+ *  • Slightly lighter fill in dark mode (#2A2A3D)
+ *  • Pure white icons in dark mode, pure black in light mode
+ *  • Accent border when playing
+ *  • Flat, clean, modern — no shadows or elevation
+ * ============================================================
+ */
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -5,10 +16,11 @@ import {
   ActivityIndicator,
   Animated,
   Easing,
+  StyleSheet,
 } from "react-native";
 import { Play, Pause } from "lucide-react-native";
 import { useAudioPlayer } from "expo-audio";
-import { COLORS } from "../../theme/colors";
+import { useTheme } from "../../hooks/useTheme";
 
 interface AudioPlayerButtonProps {
   streamUrl: string;
@@ -20,31 +32,38 @@ export default function AudioPlayerButton({
   const player = useAudioPlayer(streamUrl);
   const [loading, setLoading] = useState(false);
   const pulse = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef<Animated.CompositeAnimation | null>(null);
+  const { background, accent, border, isLight } = useTheme();
 
+  const isPlaying = player.playing;
+
+  // 🔁 Pulse animation only when NOT playing
   useEffect(() => {
-    if (player.playing) {
-      Animated.loop(
+    if (!isPlaying) {
+      pulseAnim.current = Animated.loop(
         Animated.sequence([
           Animated.timing(pulse, {
             toValue: 1.08,
-            duration: 800,
+            duration: 900,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
           Animated.timing(pulse, {
             toValue: 1,
-            duration: 800,
+            duration: 900,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
         ])
-      ).start();
+      );
+      pulseAnim.current.start();
     } else {
-      pulse.stopAnimation();
+      pulseAnim.current?.stop();
       pulse.setValue(1);
     }
-  }, [player.playing]);
+  }, [isPlaying]);
 
+  // ▶️ / ⏸ Toggle playback
   async function togglePlayback() {
     try {
       setLoading(true);
@@ -57,48 +76,55 @@ export default function AudioPlayerButton({
     }
   }
 
+  // 🎨 Updated flat palette
+  const BG = isLight ? background : "#2A2A3D"; // ✨ lighter dark mode surface
+  const BORDER = isPlaying ? accent : isLight ? "#D1D5DB" : "#3A3A50"; // subtle border for separation
+  const ICON = isPlaying
+    ? accent
+    : isLight
+    ? "#000000" // black in light mode
+    : "#FFFFFF"; // white in dark mode
+
   return (
-    <View style={{ alignItems: "center", justifyContent: "center" }}>
+    <View style={styles.container}>
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={!loading ? togglePlayback : undefined}
-        style={{
-          alignItems: "center",
-          justifyContent: "center",
-          width: 56,
-          height: 56,
-          borderRadius: 28,
-        }}
       >
         <Animated.View
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: player.playing ? COLORS.accent : "transparent",
-            borderWidth: 2.5,
-            borderColor: player.playing
-              ? COLORS.accent
-              : "rgba(255,255,255,0.3)",
-            shadowColor: player.playing ? COLORS.accent : "transparent",
-            shadowOpacity: 0.4,
-            shadowOffset: { width: 0, height: 2 },
-            shadowRadius: 6,
-            elevation: player.playing ? 8 : 0,
-            transform: [{ scale: pulse }],
-          }}
+          style={[
+            styles.button,
+            {
+              backgroundColor: BG,
+              borderColor: BORDER,
+              transform: [{ scale: pulse }],
+            },
+          ]}
         >
           {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : player.playing ? (
-            <Pause size={26} color="#fff" strokeWidth={2.4} />
+            <ActivityIndicator color={ICON} />
+          ) : isPlaying ? (
+            <Pause size={26} color={ICON} strokeWidth={2.4} />
           ) : (
-            <Play size={26} color="#fff" strokeWidth={2.4} />
+            <Play size={26} color={ICON} strokeWidth={2.4} />
           )}
         </Animated.View>
       </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  button: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2.5,
+  },
+});

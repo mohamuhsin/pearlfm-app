@@ -1,8 +1,50 @@
-import { registerRootComponent } from "expo";
+import React from "react";
+import { StatusBar, View, ActivityIndicator, Platform } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import RootNavigator from "./navigation/RootNavigator";
+import { ThemeProvider, useThemeContext } from "./context/ThemeContext";
 
-export default function App() {
-  return <RootNavigator />;
+function ThemedApp() {
+  const { colors, isDark, isLoaded } = useThemeContext();
+
+  if (!isLoaded) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: isDark ? "#0A091A" : "#FFF8F0",
+        }}
+      >
+        <ActivityIndicator size="large" color={colors.accent} />
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView
+      edges={["top", "bottom"]}
+      style={{
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+      }}
+    >
+      <StatusBar
+        translucent
+        backgroundColor="transparent"
+        barStyle={isDark ? "light-content" : "dark-content"}
+      />
+      <RootNavigator />
+    </SafeAreaView>
+  );
 }
 
-registerRootComponent(App);
+export default function App() {
+  return (
+    <ThemeProvider>
+      <ThemedApp />
+    </ThemeProvider>
+  );
+}

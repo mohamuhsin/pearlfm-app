@@ -1,3 +1,12 @@
+/**
+ * ============================================================
+ *  🔙 BackHeader — Pearl FM Mobile
+ * ------------------------------------------------------------
+ *  A reusable, theme-aware back header with optional “Done”
+ *  button. Uses blur on iOS and surface color on Android.
+ * ============================================================
+ */
+
 import React from "react";
 import {
   View,
@@ -11,40 +20,45 @@ import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import { ArrowLeft } from "lucide-react-native";
-import { COLORS } from "../../theme/colors";
+import { useTheme } from "../../hooks/useTheme";
 
 interface BackHeaderProps {
   title: string;
-  variant?: "light" | "dark";
   showDone?: boolean;
   onDonePress?: () => void;
 }
 
 export default function BackHeader({
   title,
-  variant = "light",
   showDone = false,
   onDonePress,
 }: BackHeaderProps) {
   const navigation = useNavigation();
-  const isLight = variant === "light";
-  const BG = isLight ? COLORS.primary : COLORS.backgroundDark;
-  const TEXT = COLORS.white;
-  const ACCENT = COLORS.accent;
+  const { isLight, surface, border, text, accent } = useTheme();
+  const statusStyle = isLight ? "dark-content" : "light-content";
 
+  // 🍏 Platform container (blur vs solid)
   const Container =
     Platform.OS === "ios"
       ? ({ children }: { children: React.ReactNode }) => (
           <BlurView
-            intensity={40}
+            intensity={30}
             tint={isLight ? "light" : "dark"}
-            style={[styles.container, { backgroundColor: "transparent" }]}
+            style={styles.container}
           >
             {children}
           </BlurView>
         )
       : ({ children }: { children: React.ReactNode }) => (
-          <View style={[styles.container, { backgroundColor: BG }]}>
+          <View
+            style={[
+              styles.container,
+              {
+                backgroundColor: surface,
+                borderBottomColor: border,
+              },
+            ]}
+          >
             {children}
           </View>
         );
@@ -54,31 +68,44 @@ export default function BackHeader({
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle="light-content"
+        barStyle={statusStyle}
       />
+
       <SafeAreaView edges={["top", "left", "right"]}>
-        <View style={[styles.separator, { backgroundColor: ACCENT }]} />
+        {/* Accent separator line */}
+        <View style={[styles.separator, { backgroundColor: accent }]} />
 
         <Container>
+          {/* 🔙 Back button */}
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             activeOpacity={0.8}
             style={styles.backButton}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
           >
-            <ArrowLeft size={22} color={TEXT} strokeWidth={2.4} />
+            <ArrowLeft size={22} color={text} strokeWidth={2.4} />
           </TouchableOpacity>
 
-          <Text style={[styles.title, { color: TEXT }]} numberOfLines={1}>
+          {/* 🏷️ Title */}
+          <Text
+            style={[styles.title, { color: text }]}
+            numberOfLines={1}
+            accessibilityRole="header"
+          >
             {title}
           </Text>
 
+          {/* ✅ Done button (optional) */}
           {showDone && (
             <TouchableOpacity
               onPress={onDonePress || (() => navigation.goBack())}
               activeOpacity={0.8}
               style={styles.doneButton}
+              accessibilityRole="button"
+              accessibilityLabel="Done"
             >
-              <Text style={[styles.doneText, { color: TEXT }]}>Done</Text>
+              <Text style={[styles.doneText, { color: accent }]}>Done</Text>
             </TouchableOpacity>
           )}
         </Container>
@@ -112,7 +139,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255,255,255,0.08)",
   },
   backButton: {
     position: "absolute",
