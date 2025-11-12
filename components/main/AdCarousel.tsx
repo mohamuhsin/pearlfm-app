@@ -1,13 +1,3 @@
-/**
- * ============================================================
- *  🎞️ AdCarousel — Pearl FM Mobile (Fixed-Dots Final)
- * ------------------------------------------------------------
- *  • Dots are visually inside the banner (not below)
- *  • Remain fixed — don’t scroll with images
- *  • No clipping of shadows or gradients
- * ============================================================
- */
-
 import React, { useRef, useState, useEffect } from "react";
 import {
   View,
@@ -18,42 +8,46 @@ import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   LayoutChangeEvent,
-  Platform,
+  Image,
+  ImageSourcePropType,
+  Dimensions,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import Section from "../reusable/Sections";
 import { useTheme } from "../../hooks/useTheme";
 import { LAYOUT } from "../../theme/layout";
 
-const HERO_HEIGHT = 220;
+const SCREEN_WIDTH = Dimensions.get("window").width;
 
-interface AdCarouselProps {
-  images?: string[];
-  interval?: number;
-}
-
-export default function AdCarousel({
-  images = [
-    "https://i.pinimg.com/736x/30/e9/7b/30e97b7958e741b718179d6ba62b6608.jpg",
-    "https://i.pinimg.com/736x/6f/7d/19/6f7d19afe09324279d2c9118b8962d53.jpg",
-    "https://i.pinimg.com/736x/85/e2/9c/85e29cd21c9443e9947ffda5b06c8e73.jpg",
-  ],
-  interval = 5000,
-}: AdCarouselProps) {
+export default function AdCarousel({ interval = 5000 }: { interval?: number }) {
   const [index, setIndex] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const flatListRef = useRef<FlatList<string>>(null);
-  const { accent, isLight } = useTheme();
+  const [containerWidth, setContainerWidth] = useState(SCREEN_WIDTH);
+  const [heights, setHeights] = useState<number[]>([]);
+  const flatListRef = useRef<FlatList<ImageSourcePropType>>(null);
+  const { accent } = useTheme();
 
-  // 📏 Measure width within PageLayout grid
-  const handleLayout = (e: LayoutChangeEvent) => {
-    const w = e.nativeEvent.layout.width;
-    if (w !== containerWidth) setContainerWidth(w);
-  };
+  const images: ImageSourcePropType[] = [
+    require("../../assets/hero/hero.jpg"),
+    require("../../assets/hero/hero.png"),
+  ];
 
-  // 🔁 Auto-scroll with cleanup
   useEffect(() => {
-    if (!containerWidth) return;
+    Promise.all(
+      images.map(
+        (src) =>
+          new Promise<number>((resolve) => {
+            const { uri } = Image.resolveAssetSource(src);
+            Image.getSize(
+              uri,
+              (w, h) => resolve((h / w) * SCREEN_WIDTH),
+              () => resolve(220)
+            );
+          })
+      )
+    ).then(setHeights);
+  }, []);
+
+  useEffect(() => {
+    if (!containerWidth || images.length < 2) return;
     const id = setInterval(() => {
       const next = (index + 1) % images.length;
       flatListRef.current?.scrollToOffset({
@@ -63,24 +57,25 @@ export default function AdCarousel({
       setIndex(next);
     }, interval);
     return () => clearInterval(id);
-  }, [index, interval, images.length, containerWidth]);
+  }, [index, interval, containerWidth]);
 
-  // 🧭 Manual scroll index update
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!containerWidth) return;
     const newIndex = Math.round(e.nativeEvent.contentOffset.x / containerWidth);
     setIndex(newIndex);
   };
 
-  const gradientColors = isLight
-    ? (["rgba(0,0,0,0.2)", "rgba(0,0,0,0.55)"] as const)
-    : (["rgba(0,0,0,0.3)", "rgba(0,0,0,0.7)"] as const);
+  const handleLayout = (e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w !== containerWidth) setContainerWidth(w);
+  };
 
   return (
     <Section pad={false} onLayout={handleLayout} style={styles.section}>
-      {containerWidth > 0 && (
-        <View style={[styles.carouselWrapper, { height: HERO_HEIGHT }]}>
-          {/* 🎞️ Image Carousel */}
+      {containerWidth > 0 && heights.length === images.length && (
+        <View
+          style={[styles.carouselWrapper, { height: heights[index] || 220 }]}
+        >
           <FlatList
             ref={flatListRef}
             data={images}
@@ -91,26 +86,18 @@ export default function AdCarousel({
             showsHorizontalScrollIndicator={false}
             bounces={false}
             onMomentumScrollEnd={handleScrollEnd}
-            renderItem={({ item }) => (
+            renderItem={({ item, index: i }) => (
               <ImageBackground
-                source={{ uri: item }}
+                source={item}
                 style={[
                   styles.card,
-                  { width: containerWidth, height: HERO_HEIGHT },
+                  { width: containerWidth, height: heights[i] || 220 },
                 ]}
                 resizeMode="cover"
-              >
-                <LinearGradient
-                  colors={gradientColors}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  style={StyleSheet.absoluteFillObject}
-                />
-              </ImageBackground>
+              />
             )}
           />
 
-          {/* 🔘 Pagination Dots — fixed & inside the frame */}
           <View style={styles.dots}>
             {images.map((_, i) => (
               <TouchableOpacity
@@ -152,20 +139,12 @@ const styles = StyleSheet.create({
   },
   card: {
     justifyContent: "flex-end",
-    overflow: "hidden", // keep gradients tidy
-    ...Platform.select({
-      android: { elevation: 4 },
-      ios: {
-        shadowColor: "#00000040",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-      },
-    }),
+    alignItems: "center",
+    backgroundColor: "#000",
   },
   dots: {
     position: "absolute",
-    bottom: LAYOUT.V_SPACING.sm, // ✅ inside the hero image
+    bottom: LAYOUT.V_SPACING.sm,
     left: 0,
     right: 0,
     flexDirection: "row",

@@ -1,10 +1,11 @@
 /**
  * ============================================================
- *  🙏 Greetings — Pearl FM Mobile (Unified Title Font Edition)
+ *  🙏 Greetings — Pearl FM Mobile (Stacked Accent Edition)
  * ------------------------------------------------------------
- *  • “Assalam Alaikum!” on its own line
- *  • “Good Morning” uses same font size & weight as Section titles
- *  • Unified typography across all home sections
+ *  • Arabic and English each on their own line
+ *  • Both use the section accent color
+ *  • Harmonized weights and vertical rhythm
+ *  • Feels peaceful, premium, and intentional
  * ============================================================
  */
 
@@ -14,37 +15,40 @@ import Section from "../reusable/Sections";
 import { useTheme } from "../../hooks/useTheme";
 
 export default function Greetings() {
-  const { text, accent } = useTheme();
-
-  // 🕒 Determine time of day
-  const hour = new Date().getHours();
-  let timeGreeting = "Good Morning";
-  if (hour >= 12 && hour < 17) timeGreeting = "Good Afternoon";
-  else if (hour >= 17 && hour < 21) timeGreeting = "Good Evening";
+  const { accent } = useTheme();
 
   return (
     <Section pad={false}>
-      <Text style={[styles.text, { color: text }]}>
-        <Text style={[styles.highlight, { color: accent }]}>
-          Assalam&nbsp;Alaikum!
+      <Text style={styles.container}>
+        <Text style={[styles.arabic, { color: accent }]}>
+          اَلسَّلَامُ عَلَيْكُمْ
         </Text>
         {"\n"}
-        {timeGreeting}
+        <Text style={[styles.english, { color: accent }]}>
+          Assalam&nbsp;Alaikum!
+        </Text>
       </Text>
     </Section>
   );
 }
 
 const styles = StyleSheet.create({
-  text: {
-    fontSize: 20, // ✅ matches Section title font size
-    fontWeight: "900",
-    letterSpacing: 0.3,
-    lineHeight: 26,
+  container: {
     textAlign: "left",
-    marginTop: 2, // visually balanced under TopBar
+    marginTop: 4,
+    lineHeight: 32,
   },
-  highlight: {
-    fontWeight: "900",
+  arabic: {
+    fontSize: 24, // slightly larger for optical balance
+    fontWeight: "800",
+    letterSpacing: 0.3,
+    includeFontPadding: false,
+  },
+  english: {
+    fontSize: 22,
+    fontWeight: "800",
+    letterSpacing: 0.25,
+    includeFontPadding: false,
+    marginTop: 2,
   },
 });

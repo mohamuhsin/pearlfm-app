@@ -1,11 +1,10 @@
 /**
  * ============================================================
- *  🔝 TopBar — Pearl FM Mobile (Compact Logo Edition)
+ *  🔝 TopBar — Pearl FM Mobile (Dual Logo Edition)
  * ------------------------------------------------------------
- *  • Bell icon: black in light mode, white in dark mode
- *  • Logo reduced for better balance & alignment
- *  • Accent unread dot stays vivid & glowing
- *  • Blur (iOS) / solid (Android) preserved
+ *  • Uses logo.png in light mode and logo1.png in dark mode
+ *  • Bell icon color adapts to theme
+ *  • Accent line retained for brand continuity
  * ============================================================
  */
 
@@ -32,6 +31,11 @@ export default function TopBar() {
 
   const statusStyle = isLight ? "dark-content" : "light-content";
   const iconColor = isLight ? "#000000" : "#FFFFFF";
+
+  // 🌗 Choose logo by theme
+  const logoSource = isLight
+    ? require("../../assets/logo.png")
+    : require("../../assets/logo1.png");
 
   // 🍏 Platform-specific container
   const Container =
@@ -77,12 +81,8 @@ export default function TopBar() {
         />
 
         <Container>
-          {/* 🟣 Pearl FM Logo (Reduced Size) */}
-          <Image
-            source={require("../../assets/logo.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          {/* 🟣 Pearl FM Logo */}
+          <Image source={logoSource} style={styles.logo} resizeMode="contain" />
 
           {/* 🔔 Notification Icon */}
           <TouchableOpacity
@@ -151,8 +151,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   logo: {
-    width: 140, // ⬅️ Reduced from 180
-    height: 40, // ⬅️ Reduced from 54
+    width: 140,
+    height: 40,
     marginLeft: -10,
   },
   iconButton: {
