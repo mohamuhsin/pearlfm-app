@@ -1,13 +1,3 @@
-/**
- * ============================================================
- *  📻 Programs — Pearl FM Mobile (Final Grid-Aligned Edition)
- * ------------------------------------------------------------
- *  • Flat-bottom cards, no double padding
- *  • Fixes bottom clipping (shadows + text visible)
- *  • Matches global 24 dp vertical rhythm
- * ============================================================
- */
-
 import React from "react";
 import {
   Text,
@@ -25,37 +15,24 @@ import { LAYOUT } from "../../theme/layout";
 export default function Programs({ variant }: { variant?: "light" | "dark" }) {
   const { isLight, text, accent, surface } = useTheme();
 
-  const CARD_BG = isLight ? "#FFFFFF" : surface || "#1C1C2A";
+  const CARD_BG = isLight ? "#F5F5F7" : surface || "#1C1C2A";
+
+  const localImage = require("../../assets/programs/programs.png");
 
   const programs = [
-    {
-      id: 1,
-      title: "Morning Light",
-      time: "6 AM – 9 AM",
-      image: "https://picsum.photos/400/350?1",
-    },
-    {
-      id: 2,
-      title: "Midday Talk",
-      time: "12 PM – 2 PM",
-      image: "https://picsum.photos/400/350?2",
-    },
-    {
-      id: 3,
-      title: "Afternoon Drive",
-      time: "3 PM – 6 PM",
-      image: "https://picsum.photos/400/350?3",
-    },
-    {
-      id: 4,
-      title: "Evening Reflections",
-      time: "7 PM – 9 PM",
-      image: "https://picsum.photos/400/350?4",
-    },
+    { id: 1, title: "Entanda Yokumakya", time: "05:00 AM — 07:00 AM" },
+    { id: 2, title: "Ettu Lyomukezze", time: "07:00 AM — 09:00 AM" },
+    { id: 3, title: "Okuburilira Kyokumakya", time: "09:00 AM — 10:00 AM" },
+    { id: 4, title: "The Inside Story", time: "10:00 AM — 12:00 PM" },
+    { id: 5, title: "The News Hour", time: "12:00 PM — 01:00 PM" },
+    { id: 6, title: "Abakyala Baziira", time: "01:00 PM — 03:00 PM" },
+    { id: 7, title: "Mpulide Kamenya", time: "03:00 PM — 05:00 PM" },
+    { id: 8, title: "Buuza Imaam", time: "05:30 PM — 06:30 PM" },
+    { id: 9, title: "Namwatulira", time: "07:00 PM — 09:00 PM" },
   ];
 
   return (
-    <Section title="Programs" pad={false}>
+    <Section title="Popular Programs" pad={false}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -69,13 +46,25 @@ export default function Programs({ variant }: { variant?: "light" | "dark" }) {
             onPress={() => console.log("Pressed:", p.title)}
           >
             <Image
-              source={{ uri: p.image }}
+              source={localImage}
               style={styles.image}
               resizeMode="cover"
             />
+
             <View style={styles.info}>
-              <Text style={[styles.cardTitle, { color: text }]}>{p.title}</Text>
-              <Text style={[styles.cardTime, { color: accent }]}>{p.time}</Text>
+              <Text
+                style={[styles.cardTitle, { color: text }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {p.title}
+              </Text>
+
+              {p.time ? (
+                <Text style={[styles.cardTime, { color: accent }]}>
+                  {p.time}
+                </Text>
+              ) : null}
             </View>
           </TouchableOpacity>
         ))}
@@ -90,21 +79,22 @@ const CARD_HEIGHT = 140;
 const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 0,
-    paddingBottom: LAYOUT.V_SPACING.md, // ✅ prevents shadow clipping
+    paddingBottom: LAYOUT.V_SPACING.md,
   },
   card: {
     width: CARD_WIDTH,
-    marginRight: LAYOUT.V_SPACING.sm, // 12 dp gap between cards
-    marginBottom: LAYOUT.V_SPACING.xs, // ✅ small breathing below
+    marginRight: LAYOUT.V_SPACING.sm,
+    marginBottom: LAYOUT.V_SPACING.xs,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "rgba(255,255,255,0.08)",
-    overflow: "visible", // ✅ allows shadows
+    borderColor: "rgba(0,0,0,0.05)",
+    overflow: "visible",
+    borderRadius: 6,
     ...Platform.select({
       android: { elevation: 3 },
       ios: {
-        shadowColor: "#00000040",
+        shadowColor: "#00000020",
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.15,
         shadowRadius: 3,
       },
     }),
@@ -113,13 +103,13 @@ const styles = StyleSheet.create({
     width: "100%",
     height: CARD_HEIGHT - 40,
     backgroundColor: "#EDEDED",
-    borderTopLeftRadius: 6, // ✅ soft top edges only
+    borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
   },
   info: {
     paddingTop: LAYOUT.V_SPACING.xs,
     paddingHorizontal: 4,
-    paddingBottom: 6, // ✅ ensures text not cut
+    paddingBottom: 6,
   },
   cardTitle: {
     fontSize: 13,

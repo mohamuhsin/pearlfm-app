@@ -1,12 +1,3 @@
-/**
- * ============================================================
- *  🧭 RootNavigator — Pearl FM Mobile
- * ------------------------------------------------------------
- *  Main navigation container connecting tabs and secondary
- *  screens, fully synced with the app's dynamic theme.
- * ============================================================
- */
-
 import React from "react";
 import { View } from "react-native";
 import {
@@ -20,21 +11,21 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import TabNavigator from "./TabNavigator";
 import { RootStackParamList } from "./types";
+
 import EventsScreen from "../screens/Secondary/EventsScreen";
 import ShopScreen from "../screens/Secondary/ShopScreen";
 import PartnersScreen from "../screens/Secondary/PartnersScreen";
 import NotificationsScreen from "../screens/Secondary/NotificationsScreen";
 import ServicesScreen from "../screens/Secondary/ServicesScreen";
+import AuthScreen from "../screens/Secondary/AuthScreen";
 
 import { useThemeContext } from "../context/ThemeContext";
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
-  // 🎨 Access theme colors directly from global context
   const { colors, isLight } = useThemeContext();
 
-  // 🧠 Build a unified navigation theme
   const navTheme: NavigationTheme = {
     ...(isLight ? DefaultTheme : DarkTheme),
     colors: {
@@ -56,16 +47,13 @@ export default function RootNavigator() {
             initialRouteName="MainTabs"
             screenOptions={{
               headerShown: false,
-              presentation: "card",
               animationEnabled: true,
               gestureEnabled: true,
-              detachPreviousScreen: false,
             }}
           >
-            {/* 🌐 Main Tab Navigator */}
             <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen name="Auth" component={AuthScreen} />
 
-            {/* 🗓 Secondary Screens */}
             <Stack.Screen name="Events" component={EventsScreen} />
             <Stack.Screen name="Shop" component={ShopScreen} />
             <Stack.Screen name="Partners" component={PartnersScreen} />

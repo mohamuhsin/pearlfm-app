@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Notifications: undefined;
   Account: undefined;
   Services: undefined;
+  Auth: undefined;
 };
 
 export type TabParamList = {
@@ -13,5 +14,5 @@ export type TabParamList = {
   Charity: undefined;
   Radio: undefined;
   Tickets: undefined;
-  Account: undefined;
+  Auth: undefined;
 };

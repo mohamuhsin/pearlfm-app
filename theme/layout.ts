@@ -1,21 +1,6 @@
-/**
- * ============================================================
- *  🎨 Layout System — Pearl FM Mobile App
- * ------------------------------------------------------------
- *  Defines global spacing, radii, card sizes, and elevation
- *  for consistent UI rhythm across all screens.
- * ============================================================
- */
-
 export const LAYOUT = {
-  //
-  // 🔲 Global horizontal padding
-  //
-  H_PADDING: 24, // Safe, readable side padding for screens and sections
+  H_PADDING: 24,
 
-  //
-  // 🧱 Vertical spacing scale (typographic rhythm)
-  //
   V_SPACING: {
     xxs: 4,
     xs: 8,
@@ -23,44 +8,32 @@ export const LAYOUT = {
     md: 18,
     lg: 24,
     xl: 32,
-    xxl: 48, // hero sections or banners
-    xxxl: 64, // splash, onboarding, or topmost hero
+    xxl: 48,
+    xxxl: 64,
   },
 
-  //
-  // 🧩 Gaps between stacked sections
-  //
-  SECTION_GAP: 16, // ideal for balanced breathing space
+  SECTION_GAP: 16,
 
-  //
-  // 🟠 Border radius system (unified app curvature)
-  //
   RADIUS: {
     xs: 4,
     sm: 6,
     md: 10,
     lg: 16,
     xl: 20,
-    card: 12, // default for most cards
-    button: 24, // pill-like feel for CTA buttons
-    image: 14, // smoother rounded image corners
-    pill: 50, // full round (avatars, badges)
+    card: 12,
+    button: 24,
+    image: 14,
+    pill: 50,
   },
 
-  //
-  // 🃏 Card height presets (used in carousels, programs, etc.)
-  //
   CARD: {
     tiny: 100,
     small: 140,
     medium: 180,
     large: 220,
-    xlarge: 280, // hero / live stream highlight
+    xlarge: 280,
   },
 
-  //
-  // ⚙️ Elevation presets (consistent shadows)
-  //
   ELEVATION: {
     low: {
       shadowColor: "#00000020",
@@ -85,18 +58,12 @@ export const LAYOUT = {
     },
   },
 
-  //
-  // 📱 Responsive breakpoints (future-ready)
-  //
   BREAKPOINT: {
     mobile: 480,
     tablet: 768,
     desktop: 1024,
   },
 
-  //
-  // 💬 Typography rhythm guide
-  //
   TYPO: {
     heading: 22,
     subheading: 18,

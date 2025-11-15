@@ -1,8 +1,3 @@
-/**
- * NotificationModal — Pearl FM Mobile
- * Theme-aware modal overlay for app notifications.
- */
-
 import React from "react";
 import {
   Modal,
@@ -27,7 +22,6 @@ export default function NotificationModal({
 }: NotificationModalProps) {
   const { isLight, surface, text, muted, accent } = useTheme();
 
-  // 🎨 Themed styles
   const blurTint = isLight ? "light" : "dark";
   const overlayBG = "rgba(0,0,0,0.35)";
   const modalBG = isLight ? "rgba(255,255,255,0.95)" : "rgba(20,20,35,0.95)";
@@ -47,10 +41,8 @@ export default function NotificationModal({
       >
         <BlurView intensity={85} tint={blurTint} style={styles.blurContainer}>
           <View style={[styles.modalBox, { backgroundColor: modalBG }]}>
-            {/* Header */}
             <Text style={[styles.title, { color: accent }]}>Notifications</Text>
 
-            {/* Message */}
             <View style={styles.content}>
               <Text style={[styles.empty, { color: text }]}>All caught up</Text>
               <Text style={[styles.subtext, { color: muted }]}>
@@ -58,7 +50,6 @@ export default function NotificationModal({
               </Text>
             </View>
 
-            {/* Close button */}
             <TouchableOpacity
               onPress={onClose}
               activeOpacity={0.85}

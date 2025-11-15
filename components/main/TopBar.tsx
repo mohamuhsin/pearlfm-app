@@ -1,13 +1,3 @@
-/**
- * ============================================================
- *  🔝 TopBar — Pearl FM Mobile (Dual Logo Edition)
- * ------------------------------------------------------------
- *  • Uses logo.png in light mode and logo1.png in dark mode
- *  • Bell icon color adapts to theme
- *  • Accent line retained for brand continuity
- * ============================================================
- */
-
 import React, { useState } from "react";
 import {
   View,
@@ -32,12 +22,10 @@ export default function TopBar() {
   const statusStyle = isLight ? "dark-content" : "light-content";
   const iconColor = isLight ? "#000000" : "#FFFFFF";
 
-  // 🌗 Choose logo by theme
   const logoSource = isLight
     ? require("../../assets/logo.png")
     : require("../../assets/logo1.png");
 
-  // 🍏 Platform-specific container
   const Container =
     Platform.OS === "ios"
       ? ({ children }: { children: React.ReactNode }) => (
@@ -72,7 +60,6 @@ export default function TopBar() {
       />
 
       <SafeAreaView edges={["top", "left", "right"]}>
-        {/* 🎨 Gradient accent line */}
         <LinearGradient
           colors={[accent, "#FFAE5F"]}
           start={{ x: 0, y: 0 }}
@@ -81,10 +68,8 @@ export default function TopBar() {
         />
 
         <Container>
-          {/* 🟣 Pearl FM Logo */}
           <Image source={logoSource} style={styles.logo} resizeMode="contain" />
 
-          {/* 🔔 Notification Icon */}
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
@@ -114,7 +99,6 @@ export default function TopBar() {
         </Container>
       </SafeAreaView>
 
-      {/* 🔔 Modal */}
       <NotificationModal
         visible={showModal}
         onClose={() => setShowModal(false)}

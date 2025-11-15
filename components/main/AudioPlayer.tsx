@@ -1,14 +1,3 @@
-/**
- * ============================================================
- *  🎧 AudioPlayerButton — Pearl FM Mobile (Expo Audio Stable)
- * ------------------------------------------------------------
- *  • Global sync (only one button plays at a time)
- *  • TypeScript-safe for expo-audio@1.x
- *  • Works in background (native build / EAS)
- *  • Flat adaptive visuals (light/dark)
- * ============================================================
- */
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -18,23 +7,31 @@ import {
   Easing,
   StyleSheet,
   AppState,
-  AppStateStatus,
 } from "react-native";
+
 import { Play, Pause } from "lucide-react-native";
-import { useAudioPlayer } from "expo-audio";
+import {
+  useAudioPlayer,
+  useAudioPlayerStatus,
+  setAudioModeAsync,
+} from "expo-audio";
+
 import { useTheme } from "../../hooks/useTheme";
 
-// 🟩 Global store to coordinate all player buttons
-const globalAudioStore = {
-  currentUrl: null as string | null,
+const globalAudio = {
+  activeUrl: null as string | null,
   listeners: new Set<(url: string | null) => void>(),
+
   set(url: string | null) {
-    this.currentUrl = url;
+    this.activeUrl = url;
     this.listeners.forEach((fn) => fn(url));
   },
+
   subscribe(fn: (url: string | null) => void) {
     this.listeners.add(fn);
-    return () => this.listeners.delete(fn);
+    return () => {
+      this.listeners.delete(fn);
+    };
   },
 };
 
@@ -45,95 +42,110 @@ interface AudioPlayerButtonProps {
 export default function AudioPlayerButton({
   streamUrl,
 }: AudioPlayerButtonProps) {
-  const player = useAudioPlayer(streamUrl);
+  const player = useAudioPlayer();
+  const status = useAudioPlayerStatus(player);
+  const isPlaying = status?.playing ?? false;
+
   const [loading, setLoading] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
+
   const pulse = useRef(new Animated.Value(1)).current;
-  const pulseAnim = useRef<Animated.CompositeAnimation | null>(null);
   const { background, accent, isLight } = useTheme();
 
-  // 🔁 Keep UI synced with player + global control
+  const statusRef = useRef(status);
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsPlaying(player.playing);
-    }, 400);
+    statusRef.current = status;
+  }, [status]);
 
-    const unsub = globalAudioStore.subscribe((url) => {
-      if (url !== streamUrl && player.playing) {
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      allowsRecording: false,
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const unsub = globalAudio.subscribe((active) => {
+      if (active !== streamUrl && isPlaying) {
         player.pause();
       }
     });
+    return () => unsub();
+  }, [player, streamUrl, isPlaying]);
 
-    return () => {
-      clearInterval(interval);
-      unsub();
-    };
-  }, [player, streamUrl]);
-
-  // 🧭 Handle app state (refresh when active again)
   useEffect(() => {
-    const handleAppStateChange = (state: AppStateStatus) => {
-      if (state === "active") setIsPlaying(player.playing);
-    };
-    const sub = AppState.addEventListener("change", handleAppStateChange);
+    const sub = AppState.addEventListener("change", () => {});
     return () => sub.remove();
-  }, [player]);
+  }, []);
 
-  // 🟣 Subtle pulse animation for idle state
   useEffect(() => {
+    let anim: Animated.CompositeAnimation | null = null;
+
     if (!isPlaying) {
-      pulseAnim.current = Animated.loop(
+      anim = Animated.loop(
         Animated.sequence([
           Animated.timing(pulse, {
-            toValue: 1.08,
-            duration: 900,
+            toValue: 1.16,
+            duration: 750,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
           Animated.timing(pulse, {
             toValue: 1,
-            duration: 900,
+            duration: 750,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
           }),
         ])
       );
-      pulseAnim.current.start();
+      anim.start();
     } else {
-      pulseAnim.current?.stop();
       pulse.setValue(1);
     }
+
+    return () => anim?.stop();
   }, [isPlaying]);
 
-  // ▶️ / ⏸ Toggle playback globally
   async function togglePlayback() {
     try {
       setLoading(true);
 
-      if (player.playing) {
+      if (isPlaying) {
         await player.pause();
-        globalAudioStore.set(null);
-      } else {
-        globalAudioStore.set(streamUrl);
-        await player.play();
+        globalAudio.set(null);
+        return;
       }
-    } catch (err) {
-      console.error("Playback error:", err);
+
+      await player.replace(`${streamUrl}?t=${Date.now()}`);
+
+      await new Promise((resolve) => setTimeout(resolve, 150));
+
+      globalAudio.set(streamUrl);
+
+      await player.play();
+
+      await new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (statusRef.current?.playing === true) {
+            clearInterval(interval);
+            resolve(null);
+          }
+        }, 50);
+      });
+    } catch (e) {
+      console.error("Playback error:", e);
     } finally {
       setLoading(false);
-      setIsPlaying(player.playing);
     }
   }
 
-  // 🎨 Visuals
   const BG = isLight ? background : "#2A2A3D";
   const BORDER = isPlaying ? accent : isLight ? "#D1D5DB" : "#3A3A50";
-  const ICON = isPlaying ? accent : isLight ? "#000000" : "#FFFFFF";
+  const ICON = isPlaying ? accent : isLight ? "#000" : "#FFF";
 
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        activeOpacity={0.9}
+        activeOpacity={0.85}
         onPress={!loading ? togglePlayback : undefined}
       >
         <Animated.View
@@ -159,7 +171,6 @@ export default function AudioPlayerButton({
   );
 }
 
-// 💅 Styles
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",

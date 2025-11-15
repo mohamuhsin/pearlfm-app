@@ -11,7 +11,6 @@ export function useThemeApp(initialMode?: ThemeMode) {
   const [mode, setMode] = useState<ThemeMode>(initialMode || "system");
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // 🔹 Load from AsyncStorage
   useEffect(() => {
     (async () => {
       try {
@@ -29,18 +28,15 @@ export function useThemeApp(initialMode?: ThemeMode) {
     })();
   }, []);
 
-  // 💾 Save current mode
   useEffect(() => {
     if (isLoaded) {
       AsyncStorage.setItem(THEME_KEY, mode).catch(console.warn);
     }
   }, [mode, isLoaded]);
 
-  // ⚙️ Resolve effective mode (handles “system”)
   const effectiveMode: "light" | "dark" =
     mode === "system" ? (systemScheme === "dark" ? "dark" : "light") : mode;
 
-  // 🎨 Pick color palette
   const colors = useMemo(() => {
     const base = COLORS[effectiveMode] || COLORS.light;
     return {
@@ -51,7 +47,6 @@ export function useThemeApp(initialMode?: ThemeMode) {
     };
   }, [effectiveMode]);
 
-  // 🌗 Simplified toggle (light ↔ dark only)
   const toggleTheme = () => {
     setMode((prev) => (prev === "light" ? "dark" : "light"));
   };

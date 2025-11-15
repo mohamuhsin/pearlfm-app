@@ -11,6 +11,7 @@ import {
   Image,
   ImageSourcePropType,
   Dimensions,
+  Platform,
 } from "react-native";
 import Section from "../reusable/Sections";
 import { useTheme } from "../../hooks/useTheme";
@@ -27,15 +28,21 @@ export default function AdCarousel({ interval = 5000 }: { interval?: number }) {
 
   const images: ImageSourcePropType[] = [
     require("../../assets/hero/hero.jpg"),
-    require("../../assets/hero/hero.png"),
+    require("../../assets/hero/halali.png"),
+    require("../../assets/hero/mansoor.png"),
+    require("../../assets/hero/mtn.png"),
+    require("../../assets/hero/prestige.png"),
+    require("../../assets/hero/spreme.png"),
   ];
 
+  // Preload & calculate heights
   useEffect(() => {
     Promise.all(
       images.map(
         (src) =>
           new Promise<number>((resolve) => {
             const { uri } = Image.resolveAssetSource(src);
+            Image.prefetch(uri);
             Image.getSize(
               uri,
               (w, h) => resolve((h / w) * SCREEN_WIDTH),
@@ -46,25 +53,34 @@ export default function AdCarousel({ interval = 5000 }: { interval?: number }) {
     ).then(setHeights);
   }, []);
 
+  // Auto-scroll (stable)
   useEffect(() => {
     if (!containerWidth || images.length < 2) return;
-    const id = setInterval(() => {
-      const next = (index + 1) % images.length;
-      flatListRef.current?.scrollToOffset({
-        offset: next * containerWidth,
-        animated: true,
-      });
-      setIndex(next);
-    }, interval);
-    return () => clearInterval(id);
-  }, [index, interval, containerWidth]);
 
+    const id = setInterval(() => {
+      setIndex((prev) => {
+        const next = (prev + 1) % images.length;
+
+        flatListRef.current?.scrollToOffset({
+          offset: next * containerWidth,
+          animated: true,
+        });
+
+        return next;
+      });
+    }, interval);
+
+    return () => clearInterval(id);
+  }, [interval, containerWidth, images.length]);
+
+  // Scroll end
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (!containerWidth) return;
     const newIndex = Math.round(e.nativeEvent.contentOffset.x / containerWidth);
     setIndex(newIndex);
   };
 
+  // Layout
   const handleLayout = (e: LayoutChangeEvent) => {
     const w = e.nativeEvent.layout.width;
     if (w !== containerWidth) setContainerWidth(w);
@@ -91,18 +107,23 @@ export default function AdCarousel({ interval = 5000 }: { interval?: number }) {
                 source={item}
                 style={[
                   styles.card,
-                  { width: containerWidth, height: heights[i] || 220 },
+                  {
+                    width: containerWidth,
+                    height: heights[i] || 220,
+                  },
                 ]}
                 resizeMode="cover"
               />
             )}
           />
 
+          {/* Dots */}
           <View style={styles.dots}>
             {images.map((_, i) => (
               <TouchableOpacity
                 key={i}
-                activeOpacity={0.7}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.6}
                 onPress={() =>
                   flatListRef.current?.scrollToOffset({
                     offset: i * containerWidth,
@@ -114,8 +135,8 @@ export default function AdCarousel({ interval = 5000 }: { interval?: number }) {
                   style={[
                     styles.dot,
                     {
-                      opacity: i === index ? 1 : 0.3,
                       backgroundColor: accent,
+                      opacity: i === index ? 1 : 0.3,
                     },
                   ]}
                 />
@@ -132,16 +153,35 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: 0,
   },
+
   carouselWrapper: {
     position: "relative",
     width: "100%",
     overflow: "hidden",
+    borderRadius: 10,
+    backgroundColor: "#0002",
+
+    ...Platform.select({
+      android: { elevation: 3 },
+      ios: {
+        shadowColor: "#00000020",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+      },
+    }),
   },
+
   card: {
     justifyContent: "flex-end",
     alignItems: "center",
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+    overflow: "hidden",
     backgroundColor: "#000",
   },
+
   dots: {
     position: "absolute",
     bottom: LAYOUT.V_SPACING.sm,
@@ -151,6 +191,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
   },
+
   dot: {
     width: 7,
     height: 7,

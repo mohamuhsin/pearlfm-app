@@ -1,12 +1,3 @@
-/**
- * ============================================================
- *  🔙 BackHeader — Pearl FM Mobile
- * ------------------------------------------------------------
- *  A reusable, theme-aware back header with optional “Done”
- *  button. Uses blur on iOS and surface color on Android.
- * ============================================================
- */
-
 import React from "react";
 import {
   View,
@@ -37,7 +28,6 @@ export default function BackHeader({
   const { isLight, surface, border, text, accent } = useTheme();
   const statusStyle = isLight ? "dark-content" : "light-content";
 
-  // 🍏 Platform container (blur vs solid)
   const Container =
     Platform.OS === "ios"
       ? ({ children }: { children: React.ReactNode }) => (
@@ -72,11 +62,9 @@ export default function BackHeader({
       />
 
       <SafeAreaView edges={["top", "left", "right"]}>
-        {/* Accent separator line */}
         <View style={[styles.separator, { backgroundColor: accent }]} />
 
         <Container>
-          {/* 🔙 Back button */}
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             activeOpacity={0.8}
@@ -87,7 +75,6 @@ export default function BackHeader({
             <ArrowLeft size={22} color={text} strokeWidth={2.4} />
           </TouchableOpacity>
 
-          {/* 🏷️ Title */}
           <Text
             style={[styles.title, { color: text }]}
             numberOfLines={1}
@@ -96,7 +83,6 @@ export default function BackHeader({
             {title}
           </Text>
 
-          {/* ✅ Done button (optional) */}
           {showDone && (
             <TouchableOpacity
               onPress={onDonePress || (() => navigation.goBack())}

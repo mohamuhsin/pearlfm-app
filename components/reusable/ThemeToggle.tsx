@@ -1,14 +1,3 @@
-/**
- * ============================================================
- *  🌗 ThemeToggle — Pearl FM Mobile (Pixel-Perfect Edition)
- * ------------------------------------------------------------
- *  • Mathematically balanced thumb travel (true optical symmetry)
- *  • Crisp easing + consistent margins
- *  • Feels identical on iOS and Android
- *  • Zero overflow clipping or drift
- * ============================================================
- */
-
 import React, { useRef, useEffect } from "react";
 import {
   Animated,
@@ -24,7 +13,6 @@ export default function ThemeToggle() {
   const { isLight, toggleTheme, colors } = useThemeContext();
   const anim = useRef(new Animated.Value(isLight ? 0 : 1)).current;
 
-  // 🎞️ Smooth transition when switching theme
   useEffect(() => {
     Animated.timing(anim, {
       toValue: isLight ? 0 : 1,
@@ -34,10 +22,9 @@ export default function ThemeToggle() {
     }).start();
   }, [isLight]);
 
-  // === Interpolations ===
   const translateX = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [2, 26], // ✅ perfectly flush ends (52 width - 24 thumb - 2px inset each side)
+    outputRange: [2, 26],
   });
 
   const trackColor = anim.interpolate({
@@ -64,17 +51,14 @@ export default function ThemeToggle() {
       style={styles.container}
     >
       <Animated.View style={[styles.track, { backgroundColor: trackColor }]}>
-        {/* 🌞 Sun Icon */}
         <Animated.View style={[styles.iconLeft, { opacity: iconOpacitySun }]}>
           <Sun size={13} color="#fff" strokeWidth={2} />
         </Animated.View>
 
-        {/* 🌙 Moon Icon */}
         <Animated.View style={[styles.iconRight, { opacity: iconOpacityMoon }]}>
           <Moon size={13} color="#fff" strokeWidth={2} />
         </Animated.View>
 
-        {/* ⚪ Thumb */}
         <Animated.View
           style={[
             styles.thumb,
@@ -100,7 +84,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: "center",
     position: "relative",
-    overflow: "hidden", // ✅ ensures no bleed when animating
+    overflow: "hidden",
   },
   thumb: {
     width: 24,

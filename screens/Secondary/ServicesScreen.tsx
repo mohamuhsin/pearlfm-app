@@ -4,16 +4,6 @@ import BackHeader from "../../components/reusable/BackHeader";
 import ComingSoon from "../../components/reusable/ComingSoon";
 import { useTheme } from "../../hooks/useTheme";
 
-/**
- * ============================================================
- *  💳 ServiceScreen — Pearl FM Mobile
- * ------------------------------------------------------------
- *  • Entry point for “Pay a Service” actions
- *  • Matches design of other ComingSoon screens
- *  • Ready for UgaPay or payment API integration
- * ============================================================
- */
-
 export default function ServicesScreen() {
   const { background } = useTheme();
 

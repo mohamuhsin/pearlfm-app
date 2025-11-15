@@ -1,30 +1,19 @@
-/**
- * ============================================================
- *  🙏 Greetings — Pearl FM Mobile (Stacked Accent Edition)
- * ------------------------------------------------------------
- *  • Arabic and English each on their own line
- *  • Both use the section accent color
- *  • Harmonized weights and vertical rhythm
- *  • Feels peaceful, premium, and intentional
- * ============================================================
- */
-
 import React from "react";
 import { Text, StyleSheet } from "react-native";
 import Section from "../reusable/Sections";
 import { useTheme } from "../../hooks/useTheme";
 
 export default function Greetings() {
-  const { accent } = useTheme();
+  const { text } = useTheme();
 
   return (
     <Section pad={false}>
       <Text style={styles.container}>
-        <Text style={[styles.arabic, { color: accent }]}>
+        <Text style={[styles.arabic, { color: text }]}>
           اَلسَّلَامُ عَلَيْكُمْ
         </Text>
         {"\n"}
-        <Text style={[styles.english, { color: accent }]}>
+        <Text style={[styles.english, { color: text }]}>
           Assalam&nbsp;Alaikum!
         </Text>
       </Text>
@@ -39,7 +28,7 @@ const styles = StyleSheet.create({
     lineHeight: 32,
   },
   arabic: {
-    fontSize: 24, // slightly larger for optical balance
+    fontSize: 24,
     fontWeight: "800",
     letterSpacing: 0.3,
     includeFontPadding: false,

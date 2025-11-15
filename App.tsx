@@ -4,11 +4,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as SystemUI from "expo-system-ui";
 import RootNavigator from "./navigation/RootNavigator";
 import { ThemeProvider, useThemeContext } from "./context/ThemeContext";
+import Toast from "react-native-toast-message";
 
 function ThemedApp() {
   const { colors, isDark, isLoaded } = useThemeContext();
 
-  // 🟡 Sync Android system background with theme
   React.useEffect(() => {
     SystemUI.setBackgroundColorAsync(colors.background);
   }, [colors.background]);
@@ -43,6 +43,7 @@ function ThemedApp() {
         barStyle={isDark ? "light-content" : "dark-content"}
       />
       <RootNavigator />
+      <Toast />
     </SafeAreaView>
   );
 }

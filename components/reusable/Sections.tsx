@@ -1,13 +1,3 @@
-/**
- * ============================================================
- *  🧩 Section — Pearl FM Mobile (Unified Grid Final)
- * ------------------------------------------------------------
- *  • Standardized 19 / 900 / 0.3 typography across app
- *  • Matches all section titles (Programs, Top Actions, etc.)
- *  • Removes redundant spacing for grid-based parents
- * ============================================================
- */
-
 import React from "react";
 import {
   View,
@@ -64,8 +54,8 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   title: {
-    fontSize: 19, // ✅ unified title size
-    fontWeight: "900", // ✅ same bold weight as all section headers
+    fontSize: 19,
+    fontWeight: "900",
     letterSpacing: 0.3,
     lineHeight: 24,
     marginBottom: 16,

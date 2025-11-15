@@ -6,7 +6,7 @@ import { Home, HeartHandshake, Ticket, User2 } from "lucide-react-native";
 import HomeScreen from "../screens/Primary/HomeScreen";
 import CharityScreen from "../screens/Primary/CharityScreen";
 import TicketsScreen from "../screens/Primary/TicketsScreen";
-import AccountScreen from "../screens/Primary/AccountScreen";
+import AuthScreen from "../screens/Secondary/AuthScreen";
 import AudioPlayerButton from "../components/main/AudioPlayer";
 import { TabParamList } from "./types";
 import { useThemeContext } from "../context/ThemeContext";
@@ -22,14 +22,14 @@ const ICONS: Record<string, React.ComponentType<any>> = {
   Home,
   Charity: HeartHandshake,
   Tickets: Ticket,
-  Account: User2,
+  Auth: User2,
 };
 
 const LABELS: Record<string, string> = {
   Home: "Home",
   Charity: "Charity",
   Tickets: "Tickets",
-  Account: "Account",
+  Auth: "Account",
 };
 
 export default function TabNavigator() {
@@ -66,6 +66,7 @@ export default function TabNavigator() {
           if (route.name === "Radio") return null;
           const Icon = ICONS[route.name] || Home;
           const label = LABELS[route.name];
+
           return (
             <View
               style={{
@@ -98,20 +99,18 @@ export default function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-
       <Tab.Screen name="Charity" component={CharityScreen} />
-
       <Tab.Screen
         name="Radio"
         component={View}
         options={{
-          tabBarButton: () => <AudioPlayerButton streamUrl={STREAM_URL} />,
+          tabBarButton: () => (
+            <AudioPlayerButton streamUrl="https://dc4.serverse.com/proxy/pearlfm/stream" />
+          ),
         }}
       />
-
       <Tab.Screen name="Tickets" component={TicketsScreen} />
-
-      <Tab.Screen name="Account" component={AccountScreen} />
+      <Tab.Screen name="Auth" component={AuthScreen} />
     </Tab.Navigator>
   );
 }

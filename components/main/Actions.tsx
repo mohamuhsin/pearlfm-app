@@ -1,13 +1,3 @@
-/**
- * ============================================================
- *  💳 TopCategories — Pearl FM Mobile (Monochrome Final v2)
- * ------------------------------------------------------------
- *  • Icons & labels are black in light mode, white in dark
- *  • Keeps accent shadows & surface depth
- *  • "Pay a Service" replaces "Partners"
- * ============================================================
- */
-
 import React, { useRef } from "react";
 import {
   View,
@@ -35,7 +25,6 @@ export default function TopCategories() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { isLight, accent, surface, border } = useTheme();
 
-  // 🎨 Pure black/white logic
   const ICON_COLOR = isLight ? "#000000" : "#FFFFFF";
   const LABEL_COLOR = isLight ? "#000000" : "#FFFFFF";
 

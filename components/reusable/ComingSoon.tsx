@@ -1,13 +1,3 @@
-/**
- * ============================================================
- *  ComingSoon — Pearl FM Mobile (Clean Edition)
- * ------------------------------------------------------------
- *  • Minimal, centered, theme-aware placeholder
- *  • No emoji — purely text-based and professional
- *  • Harmonized with Pearl FM typography scale
- * ============================================================
- */
-
 import React from "react";
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from "react-native";
 import { useTheme } from "../../hooks/useTheme";
