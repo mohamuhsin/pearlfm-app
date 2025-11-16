@@ -17,7 +17,7 @@ export default function Programs({ variant }: { variant?: "light" | "dark" }) {
 
   const CARD_BG = isLight ? "#F5F5F7" : surface || "#1C1C2A";
 
-  const localImage = require("../../assets/programs/programs.png");
+  const localImage = require("../../assets/programs/program.png");
 
   const programs = [
     { id: 1, title: "Entanda Yokumakya", time: "05:00 AM — 07:00 AM" },

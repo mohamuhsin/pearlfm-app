@@ -16,8 +16,10 @@ import {
   setAudioModeAsync,
 } from "expo-audio";
 
+import Toast from "react-native-toast-message";
 import { useTheme } from "../../hooks/useTheme";
 
+// Only one audio globally
 const globalAudio = {
   activeUrl: null as string | null,
   listeners: new Set<(url: string | null) => void>(),
@@ -44,11 +46,17 @@ export default function AudioPlayerButton({
 }: AudioPlayerButtonProps) {
   const player = useAudioPlayer();
   const status = useAudioPlayerStatus(player);
+
   const isPlaying = status?.playing ?? false;
+  const isBuffering = status?.isBuffering ?? false;
 
   const [loading, setLoading] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [manualPause, setManualPause] = useState(false);
 
+  const retryTimer = useRef<NodeJS.Timeout | null>(null);
   const pulse = useRef(new Animated.Value(1)).current;
+
   const { background, accent, isLight } = useTheme();
 
   const statusRef = useRef(status);
@@ -56,6 +64,9 @@ export default function AudioPlayerButton({
     statusRef.current = status;
   }, [status]);
 
+  /* ---------------------------------------------------------
+     Expo-audio mode
+     --------------------------------------------------------- */
   useEffect(() => {
     setAudioModeAsync({
       playsInSilentMode: true,
@@ -63,20 +74,77 @@ export default function AudioPlayerButton({
     }).catch(() => {});
   }, []);
 
+  /* ---------------------------------------------------------
+     Global single-player logic
+     --------------------------------------------------------- */
   useEffect(() => {
     const unsub = globalAudio.subscribe((active) => {
       if (active !== streamUrl && isPlaying) {
+        setManualPause(true);
         player.pause();
       }
     });
-    return () => unsub();
-  }, [player, streamUrl, isPlaying]);
 
+    // FIX: Cleanup returns void
+    return () => {
+      unsub();
+    };
+  }, [isPlaying, streamUrl, player]);
+
+  /* ---------------------------------------------------------
+     AppState cleanup
+     --------------------------------------------------------- */
   useEffect(() => {
     const sub = AppState.addEventListener("change", () => {});
-    return () => sub.remove();
+
+    // FIX: Cleanup returns void
+    return () => {
+      try {
+        sub.remove();
+      } catch {}
+    };
   }, []);
 
+  /* ---------------------------------------------------------
+     Auto reconnect (with toast)
+     --------------------------------------------------------- */
+  useEffect(() => {
+    if (manualPause) return; // user paused manually
+
+    if (isPlaying) {
+      setRetryCount(0);
+      return;
+    }
+
+    if (!isPlaying && !loading && retryCount < 5) {
+      retryTimer.current = setTimeout(async () => {
+        try {
+          await player.replace(`${streamUrl}?r=${Date.now()}`);
+          await player.play();
+          setRetryCount((c) => c + 1);
+        } catch {
+          setRetryCount((c) => c + 1);
+        }
+      }, 2000);
+    }
+
+    if (retryCount === 5) {
+      Toast.show({
+        type: "error",
+        text1: "Connection Failed",
+        text2: "Unable to reconnect to the stream.",
+      });
+    }
+
+    // FIX: Cleanup returns void
+    return () => {
+      if (retryTimer.current) clearTimeout(retryTimer.current);
+    };
+  }, [isPlaying, loading, manualPause, retryCount, player, streamUrl]);
+
+  /* ---------------------------------------------------------
+     Pulse animation
+     --------------------------------------------------------- */
   useEffect(() => {
     let anim: Animated.CompositeAnimation | null = null;
 
@@ -84,7 +152,7 @@ export default function AudioPlayerButton({
       anim = Animated.loop(
         Animated.sequence([
           Animated.timing(pulse, {
-            toValue: 1.16,
+            toValue: 1.15,
             duration: 750,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
@@ -102,45 +170,67 @@ export default function AudioPlayerButton({
       pulse.setValue(1);
     }
 
-    return () => anim?.stop();
+    // FIX: Cleanup returns void
+    return () => {
+      try {
+        anim?.stop();
+      } catch {}
+    };
   }, [isPlaying]);
 
+  /* ---------------------------------------------------------
+     Play/pause logic
+     --------------------------------------------------------- */
   async function togglePlayback() {
     try {
       setLoading(true);
 
       if (isPlaying) {
+        setManualPause(true);
         await player.pause();
         globalAudio.set(null);
         return;
       }
 
-      await player.replace(`${streamUrl}?t=${Date.now()}`);
+      setManualPause(false); // user wants to play again
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
-
+      await player.replace(`${streamUrl}?ts=${Date.now()}`);
       globalAudio.set(streamUrl);
 
       await player.play();
 
-      await new Promise((resolve) => {
-        const interval = setInterval(() => {
-          if (statusRef.current?.playing === true) {
-            clearInterval(interval);
+      // wait for playing
+      await new Promise((resolve, reject) => {
+        const iv = setInterval(() => {
+          if (statusRef.current?.playing) {
+            clearInterval(iv);
             resolve(null);
           }
         }, 50);
+
+        setTimeout(() => {
+          clearInterval(iv);
+          reject(new Error("timeout"));
+        }, 5000);
       });
+
+      setRetryCount(0);
     } catch (e) {
-      console.error("Playback error:", e);
+      Toast.show({
+        type: "error",
+        text1: "Playback Error",
+        text2: "Unable to start the stream.",
+      });
     } finally {
       setLoading(false);
     }
   }
 
+  /* UI */
   const BG = isLight ? background : "#2A2A3D";
   const BORDER = isPlaying ? accent : isLight ? "#D1D5DB" : "#3A3A50";
   const ICON = isPlaying ? accent : isLight ? "#000" : "#FFF";
+  const showBuffering = loading || isBuffering;
 
   return (
     <View style={styles.container}>
@@ -158,7 +248,7 @@ export default function AudioPlayerButton({
             },
           ]}
         >
-          {loading ? (
+          {showBuffering ? (
             <ActivityIndicator color={ICON} />
           ) : isPlaying ? (
             <Pause size={26} color={ICON} strokeWidth={2.4} />
@@ -172,10 +262,7 @@ export default function AudioPlayerButton({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  container: { alignItems: "center", justifyContent: "center" },
   button: {
     width: 58,
     height: 58,

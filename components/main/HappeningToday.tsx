@@ -30,7 +30,7 @@ export default function HappeningToday() {
 
   return (
     <Section pad={false} onLayout={handleLayout} style={styles.section}>
-      <Text style={[styles.header, { color: text }]}>Advertisement</Text>
+      <Text style={[styles.header, { color: text }]}>Promotions</Text>
 
       <View style={[styles.carouselWrapper, { height: FIXED_HEIGHT }]}>
         <FlatList

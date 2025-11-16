@@ -4,58 +4,62 @@
     "slug": "pearl-fm",
     "version": "1.0.0",
     "orientation": "portrait",
+
     "icon": "./assets/icon.png",
     "scheme": "pearlfm",
+
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+
     "updates": {
       "enabled": false
     },
+
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#FE7C1C"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+
+    "assetBundlePatterns": ["**/*"],
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "pearlfmuganda.com",
       "infoPlist": {
-        "UIBackgroundModes": [
-          "audio"
-        ],
+        "UIBackgroundModes": ["audio"],
         "NSMicrophoneUsageDescription": "This app uses the microphone for live radio features.",
         "NSBluetoothAlwaysUsageDescription": "Pearl FM uses Bluetooth for audio playback on wireless devices."
       }
     },
+
     "android": {
       "package": "pearlfmuganda.com",
       "versionCode": 2,
-      "permissions": [
-        "WAKE_LOCK",
-        "FOREGROUND_SERVICE",
-        "POST_NOTIFICATIONS"
-      ],
+
+      "permissions": ["WAKE_LOCK"],
+
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FE7C1C"
+        "backgroundImage": "./assets/adaptive-icon.png"
       },
+
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
-    "plugins": [
-      "expo-system-ui"
-    ],
+
+    "plugins": ["expo-system-ui"],
+
     "web": {
       "favicon": "./assets/favicon.png"
     },
+
     "extra": {
       "eas": {
         "projectId": "7d99ae87-04dc-4be4-b22d-c56b07f620ba"
       }
     },
+
     "owner": "mohamuhsin"
   }
 }
